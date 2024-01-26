@@ -2,8 +2,8 @@
 import abc
 from typing import Optional, List, Any, Type
 
-from common_models import SensorItem
-from storage import Storage
+from components.common_models import SensorItem
+from components.storage import Storage
 
 
 class BaseParser(metaclass=abc.ABCMeta):
