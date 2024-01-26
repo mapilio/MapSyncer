@@ -1,16 +1,17 @@
 # run.py
-import sys
 import os
+import sys
+
+#TODO Move lines 5 and 6 to __init__.py
+project_root = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(os.path.join(project_root, 'components'))
+
 from mapilio_kit.components.login import list_all_users
-from mapilio_kit.base import authenticate
 from mapilio_kit.components.edit_config import edit_config
 from mapilio_kit.base import authenticator
-from download import download_user_images
+from components.download import download_user_images
 import getpass
-from colorama import Fore, Style, init
-
-# Eğer kullanıcı önceden indirdiği dataları spesifik olarak tekrar upload etmek isterse ve verdiği pathi
-# C:\Users\yusuf\Desktop\Karta_to_Mapilio\test\mapilio_images bu şekilde verirse kullanı resimleri tekrar indirecek.
+from colorama import Fore, init
 
 
 def main():

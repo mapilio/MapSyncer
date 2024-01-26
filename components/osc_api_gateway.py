@@ -1,15 +1,12 @@
 """This module is used as a gateway to the OSC api."""
 import asyncio
 import concurrent.futures
-import datetime
-import hashlib
 import os.path
 import shutil
 import logging
 from typing import Tuple, Optional, List
 
 import requests
-import constants
 import osc_api_config
 from storage import Storage
 from osc_api_config import OSCAPISubDomain
