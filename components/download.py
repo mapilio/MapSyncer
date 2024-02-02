@@ -10,7 +10,7 @@ from concurrent.futures import (
 )
 from typing import List, Tuple
 
-from tqdm import tqdm
+from tqdm.auto import tqdm
 
 from common_models import GPS
 from storage import Local
@@ -94,7 +94,7 @@ def _download_photo_sequence(osc_api: OSCApi,
             download_bar.update(1)
     if not download_success:
         LOGGER.info("Download failed for sequence %s", str(sequence.online_id))
-        return False, []
+        return False, [], []
     return True, photos , lth_images
 
 
