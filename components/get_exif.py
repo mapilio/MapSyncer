@@ -4,6 +4,41 @@ import requests
 import json
 import cv2
 import string
+from colorama import Fore, Style, init
+from calculation.distance import Distance
+
+
+
+def check_seq(prev_lon,prev_lat,curr_lon,curr_lat,next_lon,next_lat,threshold=50):
+    """
+                                                            next_coord
+                                                                    *
+        prev_coord
+                *
+
+                                curr_coord
+                                        *
+        it calculate distance between curr coordinate with previous and next coordinate. and make a decision to whether change the sequence or not.
+    Args:
+        prev_lon:
+        prev_lat:
+        curr_lon:
+        curr_lat:
+        next_lon:
+        next_lat:
+
+    Returns:
+        situation
+    """
+    dist1=Distance.haversine(lon1=prev_lon, lat1=prev_lat, lon2=curr_lon, lat2=curr_lat)
+    dist2=Distance.haversine(lon1=curr_lon,lat1=curr_lat,lon2=next_lon,lat2=next_lat)
+    if dist1>threshold and dist2<=threshold:
+        return True
+    elif dist1<threshold:
+        return False
+    elif dist1>threshold and dist2>threshold:
+        print(f"{Fore.YELLOW} The current point is far away from other points.{Fore.RESET}")
+        return False
 
 
 def unique_sequence_id_generator(letter_count: int = 8, digit_count: int = 4) -> str:
@@ -69,7 +104,16 @@ def get_exif(seq_id, sequence_path, lth_images):
             fov = 0
 
             for idx,api_photo_data in enumerate(api_data['result']['data']):
-                if idx % 250 == 0:
+                curr_lat=float(api_photo_data["matchLat"]) if api_photo_data.get("matchLat") is not None else float(api_photo_data["lat"])
+                curr_lon=float(api_photo_data["matchLng"]) if api_photo_data.get("matchLng") is not None else float(api_photo_data["lng"])
+                if idx + 2 < len(api_data['result']['data']) and idx > 1: # cannot use idx + 1 ,idx >0 in this condition. in this situation the last and first items that should not stand alone in sequence.
+                    prev_lat=float(api_data['result']['data'][idx-1]["matchLat"]) if api_data['result']['data'][idx-1].get("matchLat") is not None else float(api_data['result']['data'][idx-1]["lat"])
+                    next_lat=float(api_data['result']['data'][idx+1]["matchLat"]) if api_data['result']['data'][idx+1].get("matchLat") is not None else float(api_data['result']['data'][idx+1]["lat"])
+                    prev_lon=float(api_data['result']['data'][idx-1]["matchLng"]) if api_data['result']['data'][idx-1].get("matchLng") is not None else float(api_data['result']['data'][idx-1]["lng"])
+                    next_lon=float(api_data['result']['data'][idx+1]["matchLng"]) if api_data['result']['data'][idx+1].get("matchLng") is not None else float(api_data['result']['data'][idx+1]["lng"])
+                    situation=check_seq(prev_lon,prev_lat,curr_lon,curr_lat,next_lon,next_lat)
+                else: situation=False
+                if idx % 250 == 0 or situation:
                     current_unique_id = unique_sequence_id_generator(letter_count=8, digit_count=4)
 
                 if api_photo_data.get("cameraParameters") is not None:
