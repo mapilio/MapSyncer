@@ -9,7 +9,6 @@ MapSyncer depends on the following libraries that need to be installed before bu
 
 * [Mapilio Kit](https://github.com/mapilio/mapilio-kit)
 * [Exiftool](https://exiftool.org/install.html)
-* [FFmpeg](https://ffmpeg.org/download.html)
 
 ## Installation
 
