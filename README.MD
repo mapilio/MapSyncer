@@ -5,7 +5,7 @@ Follow the steps below to get started:
 
 ## Install dependencies
 
-From the link [here](https://github.com/mapilio/mapilio-kit), complete the Getting Started section to get the Mapilio Kit working.<br>
+MapSyncer depends on the following libraries that need to be installed before building it.<br>
 
 * [Mapilio Kit](https://github.com/mapilio/mapilio-kit)
 * [Exiftool](https://exiftool.org/install.html)
