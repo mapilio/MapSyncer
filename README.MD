@@ -3,6 +3,14 @@
 This repository provides a streamlined process for downloading user images from Kartaview and uploading them to Mapilio.<br>
 Follow the steps below to get started:
 
+## Install dependencies
+
+MapSyncer depends on the following libraries that need to be installed before building it.<br>
+
+* [Mapilio Kit](https://github.com/mapilio/mapilio-kit)
+* [Exiftool](https://exiftool.org/install.html)
+* [FFmpeg](https://ffmpeg.org/download.html)
+
 ## Installation
 
 1. Clone the **MapSyncer** repository:
