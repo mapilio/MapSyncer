@@ -16,7 +16,7 @@ from colorama import Fore, init
 
 def main():
     init()
-    folder_path = input(f"{Fore.YELLOW}Please enter the path to the folder to download images from: \n {Fore.RESET}")
+    folder_path = input(f"{Fore.YELLOW}Please enter the path to the folder to download images from:\n{Fore.RESET}")
     folder_path = folder_path.strip('\'"')
 
     if 'mapilio_images' in folder_path:
