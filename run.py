@@ -2,7 +2,7 @@
 import os
 import sys
 
-#TODO Move lines 5 and 6 to __init__.py
+# TODO Move lines 5 and 6 to __init__.py
 project_root = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(project_root, 'components'))
 
@@ -38,7 +38,6 @@ def main():
     else:
         check_authenticate = True
 
-
     if check_authenticate:
 
         if folder_path is not None and len(os.listdir(folder_path)) == 0:
@@ -47,9 +46,11 @@ def main():
 
         folder_selection(folder_path)
 
+
 def get_args_mapilio(func):
     arg_names = func.__code__.co_varnames[:func.__code__.co_argcount]
     return {arg: None for arg in arg_names}
+
 
 def print_folder_structure(folder_path, indent=""):
     print(indent + os.path.basename(folder_path) + "/")
@@ -82,6 +83,7 @@ def check_auth():
         print("Please enter your username, email and password properly \n\n\n\n\n")
         check_auth()
 
+
 def folder_selection(path):
     print("Choose an option:")
     print("1. Upload all folders")
@@ -94,6 +96,7 @@ def folder_selection(path):
         upload_commands = []
         for folder_name in os.listdir(path):
             folder_path = os.path.join(path, folder_name)
+            if len(os.listdir(folder_path)) < 5: continue
             upload_command = f"mapilio_kit upload --processed {folder_path}"
             upload_commands.append(upload_command)
 
@@ -109,12 +112,13 @@ def folder_selection(path):
         folder_name_numeric = ''.join(filter(str.isdigit, folder_name))
         print(f"{Fore.YELLOW}Uploading folder '{folder_name_numeric}'... {Fore.RESET}")
 
-        upload_command = f"mapilio_kit upload --processed {path+'/'+folder_name_numeric}"
+        upload_command = f"mapilio_kit upload --processed {path + '/' + folder_name_numeric}"
         os.system(upload_command)
 
     else:
         print(f"{Fore.RED}Invalid choice. Please enter 1 or 2.{Fore.RESET}")
-        folder_selection()
+        folder_selection(path)
+
 
 if __name__ == "__main__":
     main()
