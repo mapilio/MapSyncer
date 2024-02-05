@@ -4,12 +4,12 @@ from typing import Optional, Dict, List, Tuple, Type
 from common.models import SensorItem, PhotoMetadata, ExifParameters, Attitude, Acceleration
 from common.models import Compass, CameraParameters, DeviceMotion, OBD, GPS, Pressure, Gravity
 from common.models import RecordingType, OSCDevice
-from components.storage import Storage
+from MapSyncer.components.storage import Storage
 
-from components.parsers.base import BaseParser
-from components.parsers.osc_metadata import SensorItemDefinition, ItemParser
-import components.parsers.osc_metadata.legacy_item_factory as legacy
-from components.parsers.osc_metadata import ItemLegacyParser
+from MapSyncer.components.parsers.base import BaseParser
+from MapSyncer.components.parsers.osc_metadata import SensorItemDefinition, ItemParser
+from MapSyncer import components as legacy
+from MapSyncer.components.parsers.osc_metadata import ItemLegacyParser
 
 
 class MetadataParser(BaseParser):

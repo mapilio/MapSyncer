@@ -8,7 +8,7 @@ import imagesize
 
 from exifread.classes import IfdTag
 
-from components.common_models import (
+from MapSyncer.components.common_models import (
     PhotoMetadata,
     GPS,
     Compass,
@@ -17,8 +17,8 @@ from components.common_models import (
     ExifParameters,
 )
 
-from components.parsers.base import BaseParser
-from components.parsers.exif.utils import (
+from MapSyncer.components.parsers.base import BaseParser
+from MapSyncer.components.parsers.exif.utils import (
     ExifTags,
     CardinalDirection,
     SpeedUnit,
@@ -30,7 +30,7 @@ from components.parsers.exif.utils import (
     dms_to_dd
 )
 
-from components.storage import Storage
+from MapSyncer.components.storage import Storage
 
 
 class ExifParser(BaseParser):
