@@ -7,7 +7,7 @@ import setuptools
 
 def get_long_desc():
     basedir = os.path.abspath(os.path.dirname(__file__))
-    with io.open(os.path.join(basedir, "README.MD"), encoding="utf-8") as f:
+    with io.open(os.path.join(basedir, "README.md"), encoding="utf-8") as f:
         return f.read()
 
 def get_version():
