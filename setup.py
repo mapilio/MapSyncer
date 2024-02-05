@@ -9,19 +9,23 @@ def get_long_desc():
     basedir = os.path.abspath(os.path.dirname(__file__))
     with io.open(os.path.join(basedir, "README.MD"), encoding="utf-8") as f:
         return f.read()
+
 def get_version():
     cwd = os.path.abspath(os.path.dirname(__file__))
     current_version = os.path.join(cwd, "MapSyncer", "components", "version_.py")
     with io.open(current_version, encoding="utf-8") as f:
         return re.search(r'^__version__ = [\'"]([^\'"]*)[\'"]', f.read(), re.M).group(1)
 
+# TODO: This part will be removed with an alternative solution.
 INSTALL_REQUIRES = [
     'mapilio-kit',
     'ExifRead',
     'calculation-mapilio',
     'requests_oauthlib',
-    'opencv-python'
+    'opencv-python',
+    'setuptools'
 ]
+
 setuptools.setup(
     name="mapsyncer",
     version=get_version(),
