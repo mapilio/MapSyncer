@@ -17,7 +17,7 @@
    <a href="">
       <img src="https://img.shields.io/github/contributors/mapilio/MapSyncer?color=orange" alt="contributors"></a>
    <a href="">
-      <img src="https://img.shields.io/github/issues-raw/mapilio/mapilio-kit-v2?color=darkred" alt="issue-counter"></a>
+      <img src="https://img.shields.io/github/issues-raw/mapilio/MapSyncer?color=darkred" alt="issue-counter"></a>
    <a href="">
       <img src="https://img.shields.io/github/release-date-pre/mapilio/MapSyncer?color=green" alt="release-date-badge"></a>
    <a href="">
