@@ -60,15 +60,21 @@ python run.py
 
 Then you can start the whole process by giving the **folder path** where you would like to download your images 💥.
 
-### Contributing
+
+## Clean Up
+
+If you need to remove and uninstall everything except images, please refer to the [Clean Up instructions](CleanUp.md).
+
+
+## Contributing
 
 If you encounter issues or have suggestions for improvements, please report them on the GitHub repository 🚀.
 
-### License
+## License
 
 This project is licensed under the [MIT License](https://github.com/mapilio/MapSyncer?tab=MIT-1-ov-file).
 
-### Contributions and Contact
+## Contributions and Contact
 Feel free to reach out [GitHub Issues]() if you have any questions, contribution idea or need further assistance!<br>
 
 [Mapilio](https://mapilio.com/) is everywhere in the world! 🌍
