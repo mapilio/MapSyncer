@@ -23,6 +23,7 @@ INSTALL_REQUIRES = [
     'calculation-mapilio',
     'requests_oauthlib',
     'opencv-python',
+    'imagesize',
     'setuptools'
 ]
 
