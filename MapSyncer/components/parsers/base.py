@@ -2,8 +2,8 @@
 import abc
 from typing import Optional, List, Any, Type
 
-from components.common_models import SensorItem
-from components.storage import Storage
+from MapSyncer.components.common_models import SensorItem
+from MapSyncer.components.storage import Storage
 
 
 class BaseParser(metaclass=abc.ABCMeta):
