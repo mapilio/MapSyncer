@@ -13,10 +13,24 @@ Please, follow the steps below to get started:
 
 MapSyncer depends on the following libraries that need to be installed before building it.<br>
 
-* [Mapilio Kit](https://github.com/mapilio/mapilio-kit)
+* [Mapilio Kit](https://github.com/mapilio/mapilio-kit)(In case you would like to follow the manual way you should install mapilio-kit manually.)
 * [Exiftool](https://exiftool.org/install.html)
 
-## Installation
+
+## Pip Installation
+
+You may simply install the MapSyncer by using this command below;
+
+```bash
+pip install mapsyncer
+```
+
+## CLI Usage
+```bash
+RunMapSyncer
+```
+
+## Manual Installation
 
 1. Clone the **MapSyncer** repository:
 
