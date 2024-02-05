@@ -2,10 +2,6 @@
 import os
 import sys
 
-# TODO Move lines 5 and 6 to __init__.py
-project_root = os.path.dirname(os.path.realpath(__file__))
-sys.path.append(os.path.join(project_root, 'components'))
-
 from mapilio_kit.components.login import list_all_users
 from mapilio_kit.components.edit_config import edit_config
 from mapilio_kit.base import authenticator
