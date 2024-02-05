@@ -1,6 +1,6 @@
 <div align="center">
    <a href="https://mapilio.com/" target="_blank">
-   <img width="100%" src="https://github.com/mapilio/MapSyncer/blob/main/docs/assets/mapsyncer-banner.png"></a>
+   <img width="100%" src="https://github.com/mapilio/MapSyncer/blob/main/docs/assets/mapsyncer-banner2.png"></a>
 </div>
 
 # MapSyncer
