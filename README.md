@@ -9,14 +9,41 @@ This repository provides a streamlined process for downloading user images from 
 
 Please, follow the steps below to get started:
 
+
+## Workflow
+The download command follows these steps below:
+
+1. Authenticate the user with OpenStreetMap (OSM) account via Kartaview.
+2. Get the list of sequences uploaded by the user.
+3. Download all images and metadata for each sequence.
+4. Authenticate for Mapilio.
+5. You can select the specific sequences you want to upload to Mapilio or all downloaded sequences.
+6. And the process ends successfully.
+
+Don't worry, run.py will lead all this for you 💫. 
+
+
 ## Install dependencies
 
 MapSyncer depends on the following libraries that need to be installed before building it.<br>
 
-* [Mapilio Kit](https://github.com/mapilio/mapilio-kit)
+* [Mapilio Kit](https://github.com/mapilio/mapilio-kit) `In case you would like to follow the manual way you should install mapilio-kit manually.`
 * [Exiftool](https://exiftool.org/install.html)
 
-## Installation
+
+## Pip Installation and Usage
+
+You may simply install and use the MapSyncer by using these commands below;
+
+```bash
+# Installation
+pip install mapsyncer
+
+# CLI Usage
+RunMapSyncer
+```
+
+## Manual Installation
 
 1. Clone the **MapSyncer** repository:
 
@@ -43,23 +70,13 @@ mapsyncer_env/Scripts/activate
 pip install -r requirements.txt
 ```
 
-## Workflow
-The download command follows these steps below:
-
-1. Authenticate the user with OpenStreetMap (OSM) account via Kartaview.
-2. Get the list of sequences uploaded by the user.
-3. Download all images and metadata for each sequence.
-4. Authenticate for Mapilio.
-5. You can select the specific sequences you want to upload to Mapilio or all downloaded sequences.
-6. And the process ends successfully.
-
-Don't worry, run.py will lead all this for you 💫. 
-
 ## Usage
 
 The whole process will take place in one line 
 
 ```bash
+cd MapSyncer
+
 python run.py
 ```
 
