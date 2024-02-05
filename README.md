@@ -3,6 +3,27 @@
    <img width="100%" src="https://github.com/mapilio/MapSyncer/blob/main/docs/assets/mapsyncer-banner2.png"></a>
 </div>
 
+<div align="center">
+    <a href="https://github.com/mapilio/MapSyncer/actions/workflows/ci.yml">
+      <img src="https://github.com/mapilio/MapSyncer/actions/workflows/ci.yml/badge.svg" alt="MapSyncer CI"></a>
+   <a href="https://github.com/mapilio/MapSyncer/blob/main/LICENSE">
+      <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="mit-license"></a>
+   <a href="https://discord.gg/uhsR97sF">
+      <img src="https://img.shields.io/discord/1028938271453089852?logo=discord" alt="discord-badge"></a>
+   <a href="https://pypi.org/project/mapilio-kit/">
+      <img src="https://img.shields.io/pypi/v/MapSyncer?color=purple" alt="PyPI version"></a>
+   <a href="">
+      <img src="https://img.shields.io/github/stars/mapilio/MapSyncer?color=blue" alt="stars"></a>
+   <a href="">
+      <img src="https://img.shields.io/github/contributors/mapilio/MapSyncer?color=orange" alt="contributors"></a>
+   <a href="">
+      <img src="https://img.shields.io/github/issues-raw/mapilio/mapilio-kit-v2?color=darkred" alt="issue-counter"></a>
+   <a href="">
+      <img src="https://img.shields.io/github/release-date-pre/mapilio/MapSyncer?color=green" alt="release-date-badge"></a>
+   <a href="">
+      <img src="https://img.shields.io/github/last-commit/mapilio/MapSyncer?color=D60051" alt="last-commit-badge"></a>
+</div>
+
 # MapSyncer
 
 This repository provides a streamlined process for downloading user images from Kartaview and uploading them to Mapilio.<br>
