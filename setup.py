@@ -20,7 +20,7 @@ def get_version():
 INSTALL_REQUIRES = [
     'mapilio-kit',
     'ExifRead',
-    'calculation-mapilio',
+    'calculation-mapilio==0.1.39',
     'requests_oauthlib',
     'opencv-python',
     'imagesize',
