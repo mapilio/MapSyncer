@@ -314,41 +314,41 @@ class OSCApi:
                           'username': user_name}
             json_response = requests.post(url=OSCApiMethods.user_sequences(self.environment),
                                           data=parameters).json()
-
-            if 'totalFilteredItems' not in json_response:
-                return [], Exception("OSC API bug missing totalFilteredItems from response")
-
-            total_items = int(json_response['totalFilteredItems'][0])
-            pages_count = int(total_items / parameters['ipp']) + 1
-            LOGGER.debug("all sequences count: %s pages count: %s",
-                         str(total_items), str(pages_count))
-            sequences = []
-            if 'currentPageItems' in json_response:
-                for item in json_response['currentPageItems']:
-                    sequences.append(OSCSequence.sequence_from_json(item))
-
-            with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-                loop = asyncio.new_event_loop()
-                futures = [
-                    loop.run_in_executor(executor,
-                                         self._sequence_page, user_name, page)
-                    for page in range(2, pages_count + 1)
-                ]
-                if not futures:
-                    loop.close()
-                    return sequences, None
-
-                done = loop.run_until_complete(asyncio.gather(*futures))
-                loop.close()
-
-                for sequence_page_return in done:
-                    # sequence_page method will return a tuple the first element
-                    # is a list of sequences
-                    sequences = sequences + sequence_page_return[0]
-
-                return sequences, None
         except requests.RequestException as ex:
             return None, ex
+        if 'totalFilteredItems' not in json_response:
+            return [], Exception("OSC API bug missing totalFilteredItems from response")
+
+        total_items = int(json_response['totalFilteredItems'][0])
+        pages_count = int(total_items / parameters['ipp']) + 1
+        LOGGER.debug("all sequences count: %s pages count: %s",
+                     str(total_items), str(pages_count))
+        sequences = []
+        if 'currentPageItems' in json_response:
+            for item in json_response['currentPageItems']:
+                sequences.append(OSCSequence.sequence_from_json(item))
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+            loop = asyncio.new_event_loop()
+            futures = [
+                loop.run_in_executor(executor,
+                                     self._sequence_page, user_name, page)
+                for page in range(2, pages_count + 1)
+            ]
+            if not futures:
+                loop.close()
+                return sequences, None
+
+            done = loop.run_until_complete(asyncio.gather(*futures))
+            loop.close()
+
+            for sequence_page_return in done:
+                # sequence_page method will return a tuple the first element
+                # is a list of sequences
+                sequences = sequences + sequence_page_return[0]
+
+            return sequences, None
+
 
     def sequence_link(self, sequence) -> str:
         """This method will return a link to OSC website page displaying the sequence
