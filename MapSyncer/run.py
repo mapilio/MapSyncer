@@ -69,7 +69,7 @@ def check_auth():
         args["user_name"] = user_name
         args["user_email"] = user_email
         args["user_password"] = user_password
-        check_authenticate = authenticator.perform_task(args)
+        check_authenticate = authenticator().perform_task(args)
         if check_authenticate:
             return check_authenticate
         else:
