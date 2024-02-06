@@ -132,6 +132,7 @@ def get_exif(seq_id, sequence_path, lth_images):
                     "captureTime": api_photo_data["shotDate"],
                     "altitude": 0,
                     "sequenceUuid": current_unique_id,
+                    "source": "KartaView",
                     "heading": float(api_photo_data["heading"]) if api_photo_data.get("heading") is not None else 0,
                     "orientation": 1,
                     "roll": 0,
@@ -145,6 +146,7 @@ def get_exif(seq_id, sequence_path, lth_images):
                     "megapixels": 0,
                     "vfov": vfov,
                     "filename": api_photo_data["name"],
+                    "accuracy_level": float(api_photo_data["gpsAccuracy"]),
                     "path": ""
                 }
 
