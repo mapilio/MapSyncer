@@ -8,9 +8,31 @@ from mapilio_kit.base import authenticator
 from .components.download import download_user_images
 import getpass
 from colorama import Fore, init
+import requests
+from .components.version_ import __version__
 
+def get_latest_version():
+    url = "https://raw.githubusercontent.com/mapilio/MapSyncer/main/MapSyncer/components/version_.py"
+    response = requests.get(url)
+    if response.status_code == 200:
+        content = response.text
+        version_line = [line for line in content.split('\n') if '__version__' in line][0]
+        latest_version = version_line.split('"')[1]
+        return latest_version
+    return None
 
 def main():
+    latest_version = get_latest_version()
+
+    if latest_version:
+        if latest_version > __version__:
+            print(f"{Fore.RED}A newer version ({latest_version}) is available!")
+            print(f'{Fore.RED}For latest MapSyncer version please update with "pip install mapsyncer --upgrade" \n')
+        else:
+            print(f"{Fore.GREEN}You have the latest MapSyncer version ({__version__}) installed.\n")
+    else:
+        print(f"{Fore.RED}Unable to fetch the latest MapSyncer version information.\n")
+
     init()
     folder_path = input(f"{Fore.YELLOW}Please enter the path to the folder to download images to:\n{Fore.RESET}")
     folder_path = folder_path.strip('\'"')
