@@ -90,40 +90,75 @@ def get_exif(seq_id, sequence_path, lth_images):
         return sequence_path
 
     url = f"https://api.openstreetcam.org/2.0/photo/?access_token={access_token}&sequenceId={seq_id}"
+    url_details = f"https://api.openstreetcam.org/details"
+
+    params = {
+        'access_token': access_token,
+        'id': seq_id
+    }
+
 
     try:
-        response = requests.get(url)
-        response.raise_for_status()
+        response_photos = requests.get(url)
+        response_details = requests.post(url_details, data=params)
+        response_photos.raise_for_status()
 
-        api_data = response.json()
+        api_data_photos = response_photos.json()
+        api_data_details = response_details.json()
 
-        if 'result' in api_data and 'data' in api_data['result']:
+        if 'result' in api_data_photos and 'data' in api_data_photos['result']:
             mapilio_description = []
 
             vfov = 0
             fov = 0
+            fLen = 0
 
-            for idx,api_photo_data in enumerate(api_data['result']['data']):
+            for idx,api_photo_data in enumerate(api_data_photos['result']['data']):
                 curr_lat=float(api_photo_data["matchLat"]) if api_photo_data.get("matchLat") is not None else float(api_photo_data["lat"])
                 curr_lon=float(api_photo_data["matchLng"]) if api_photo_data.get("matchLng") is not None else float(api_photo_data["lng"])
-                if idx + 2 < len(api_data['result']['data']) and idx > 1: # cannot use idx + 1 ,idx >0 in this condition. in this situation the last and first items that should not stand alone in sequence.
-                    prev_lat=float(api_data['result']['data'][idx-1]["matchLat"]) if api_data['result']['data'][idx-1].get("matchLat") is not None else float(api_data['result']['data'][idx-1]["lat"])
-                    next_lat=float(api_data['result']['data'][idx+1]["matchLat"]) if api_data['result']['data'][idx+1].get("matchLat") is not None else float(api_data['result']['data'][idx+1]["lat"])
-                    prev_lon=float(api_data['result']['data'][idx-1]["matchLng"]) if api_data['result']['data'][idx-1].get("matchLng") is not None else float(api_data['result']['data'][idx-1]["lng"])
-                    next_lon=float(api_data['result']['data'][idx+1]["matchLng"]) if api_data['result']['data'][idx+1].get("matchLng") is not None else float(api_data['result']['data'][idx+1]["lng"])
+                if idx + 2 < len(api_data_photos['result']['data']) and idx > 1: # cannot use idx + 1 ,idx >0 in this condition. in this situation the last and first items that should not stand alone in sequence.
+                    prev_lat=float(api_data_photos['result']['data'][idx-1]["matchLat"]) if api_data_photos['result']['data'][idx-1].get("matchLat") is not None else float(api_data_photos['result']['data'][idx-1]["lat"])
+                    next_lat=float(api_data_photos['result']['data'][idx+1]["matchLat"]) if api_data_photos['result']['data'][idx+1].get("matchLat") is not None else float(api_data_photos['result']['data'][idx+1]["lat"])
+                    prev_lon=float(api_data_photos['result']['data'][idx-1]["matchLng"]) if api_data_photos['result']['data'][idx-1].get("matchLng") is not None else float(api_data_photos['result']['data'][idx-1]["lng"])
+                    next_lon=float(api_data_photos['result']['data'][idx+1]["matchLng"]) if api_data_photos['result']['data'][idx+1].get("matchLng") is not None else float(api_data_photos['result']['data'][idx+1]["lng"])
                     situation=check_seq(prev_lon,prev_lat,curr_lon,curr_lat,next_lon,next_lat)
                 else: situation=False
                 if idx % 250 == 0 or situation:
                     current_unique_id = unique_sequence_id_generator(letter_count=8, digit_count=4)
 
-                if api_photo_data.get("cameraParameters") is not None:
-                    vfov = api_photo_data["cameraParameters"].get("vFoV")
-                    fov = api_photo_data["cameraParameters"].get("hFoV")
                 absolute_path = os.path.abspath(f'{sequence_path}/{api_photo_data["name"]}')
                 if absolute_path in lth_images:
                     img = cv2.imread(absolute_path)
                     api_photo_data["width"]=str(img.shape[1])
                     api_photo_data["height"]=str(img.shape[0])
+
+                if api_data_details["osv"]["cameraParameters"] is not None:
+                    vfov = api_data_details["osv"]["cameraParameters"]["vFoV"]
+                    fov = api_data_details["osv"]["cameraParameters"]["hFoV"]
+                    fLen = api_data_details["osv"]["cameraParameters"]["fLen"]
+
+                device_name = api_data_details.get("osv", {}).get("deviceName", "")
+                platform = api_data_details.get("osv", {}).get("platform")
+
+                if platform == "iOS" or "iPhone" in platform:
+                    device_make = "Apple"
+                    device_model = device_name.split(",")[0].replace("iPhone", "iPhone ")
+
+                elif platform == "Android" and " " in device_name:
+                    device_make = device_name.split(" ")[0]
+                    device_model = device_name.split(" ", 1)[1]
+
+                elif platform == "samsung":
+                    device_make = "Samsung"
+                    device_model = device_name
+
+                elif platform == "GoPro":
+                    device_make = "GoPro"
+                    device_model = device_name
+
+                else:
+                    device_make = "Unknown"
+                    device_model = "Unknown"
 
                 photo_data = \
                 {
@@ -133,20 +168,22 @@ def get_exif(seq_id, sequence_path, lth_images):
                     "altitude": 0,
                     "sequenceUuid": current_unique_id,
                     "source": "KartaView",
+                    "sourceUser": api_data_details.get("osv", {}).get("user"),
                     "heading": float(api_photo_data["heading"]) if api_photo_data.get("heading") is not None else 0,
                     "orientation": 1,
                     "roll": 0,
                     "pitch": 0,
                     "yaw": 0,
                     "carSpeed": 0,
-                    "deviceMake": "none",
-                    "deviceModel": "none",
+                    "deviceMake": device_make,
+                    "deviceModel": device_model,
                     "imageSize": api_photo_data["width"] + "x" + api_photo_data["height"],
                     "fov": fov,
                     "megapixels": 0,
                     "vfov": vfov,
+                    "focalLength": fLen,
                     "filename": api_photo_data["name"],
-                    "accuracy_level": float(api_photo_data["gpsAccuracy"]),
+                    "accuracy_level": float(api_photo_data["gpsAccuracy"]) if api_photo_data.get("gpsAccuracy") is not None else None,
                     "path": ""
                 }
 
