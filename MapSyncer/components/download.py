@@ -32,7 +32,7 @@ def download_user_images(to_path):
     # get all the sequneces for this user
     sequences, error = osc_api.user_sequences(user.name)
     if error:
-        LOGGER.info("Could not get sequences for the current user, try again or report a issue on "
+        print("Could not get sequences for the current user, try again or report a issue on "
                     "github")
         return
 
