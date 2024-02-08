@@ -11,6 +11,7 @@ import osc_api_config
 from storage import Storage
 from osc_api_config import OSCAPISubDomain
 from osc_api_models import OSCSequence, OSCPhoto, OSCUser
+from colorama import Fore, init
 
 LOGGER = logging.getLogger('osc_tools.osc_api_gateway')
 
@@ -139,6 +140,21 @@ class OSCApi:
 
     def __init__(self, env: OSCAPISubDomain):
         self.environment = env
+
+    def calculate_disk_space(self, total_items):
+        result = total_items * 2 / 1024
+        print(
+            f"Approximately maximum disk space to be utilized {Fore.LIGHTYELLOW_EX}{result.real:.2f}GB{Fore.RESET} of disk space. Please make sure you have your average disk space")
+        choice = input(f"{Fore.LIGHTBLUE_EX}Do you want to continue? (yes/no): ").lower()
+        if choice == 'yes' or choice == 'y':
+            print(f"{Fore.LIGHTGREEN_EX}Ongoing...")
+        elif choice == 'no' or choice == 'n':
+            print(f"{Fore.LIGHTRED_EX}Operation canceled.")
+            exit()
+        else:
+            print("Invalid choice!")
+            self.calculate_disk_space(total_items)
+
 
     @classmethod
     def __upload_response_success(cls, response: requests.Response,
@@ -307,7 +323,7 @@ class OSCApi:
 
     def user_sequences(self, user_name: str) -> Tuple[List[OSCSequence], Exception]:
         """get all tracks for a user id """
-        LOGGER.debug("getting all sequences for user: %s", user_name)
+        print(f"Getting all sequences for user:{Fore.BLUE} {user_name}{Fore.RESET} from KartaView. It can take a while according to the number of sequences.")
         try:
             parameters = {'ipp': 100,
                           'page': 1,
@@ -321,8 +337,10 @@ class OSCApi:
 
         total_items = int(json_response['totalFilteredItems'][0])
         pages_count = int(total_items / parameters['ipp']) + 1
-        LOGGER.debug("all sequences count: %s pages count: %s",
-                     str(total_items), str(pages_count))
+        print(f"{Fore.BLUE}Total count of images: {Fore.LIGHTBLUE_EX}{total_items}{Fore.RESET} {Fore.BLUE}Total count of sequences: {Fore.LIGHTBLUE_EX}{pages_count}")
+
+        self.calculate_disk_space(total_items)
+
         sequences = []
         if 'currentPageItems' in json_response:
             for item in json_response['currentPageItems']:
