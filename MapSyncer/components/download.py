@@ -31,7 +31,7 @@ def check_sequence_status(sequence_id):
         with open(log_file, 'r') as f:
             log_data_list = json.load(f)
             for entry in log_data_list:
-                if entry["seq_id"] == sequence_id and entry["download_success"] and entry["upload"]:
+                if entry["seq_id"] == sequence_id and entry["download_success"] and entry["upload_success"]:
                     return True
     return False
 
@@ -160,7 +160,7 @@ def _download_photo_sequence(osc_api: OSCApi,
     log_data = {
         "seq_id": sequence.online_id,
         "download_success": download_success,
-        "upload": False
+        "upload_success": False
     }
 
     log_data_list = []
