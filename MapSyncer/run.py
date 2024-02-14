@@ -1,6 +1,7 @@
 # run.py
 import os
 import sys
+import json
 
 from mapilio_kit.components.login import list_all_users
 from mapilio_kit.components.edit_config import edit_config
@@ -34,7 +35,7 @@ def main():
         print(f"{Fore.RED}Unable to fetch the latest MapSyncer version information.\n")
 
     init()
-    folder_path = input(f"{Fore.YELLOW}Please enter the path to the folder to download images to:\n{Fore.RESET}")
+    folder_path = input(f"{Fore.LIGHTYELLOW_EX}Please enter the path to the folder to download images to:\n{Fore.RESET}")
     folder_path = folder_path.strip('\'"')
 
     if 'mapilio_images' in folder_path:
@@ -101,28 +102,49 @@ def check_auth():
         print("Please enter your username, email and password properly \n\n\n\n\n")
         check_auth()
 
+def update_folder_status(folder_name_numeric, json_file):
+    with open(json_file, 'r') as f:
+        data = json.load(f)
+        for folder in data:
+            if folder.get('seq_id') == folder_name_numeric:
+                folder['upload_success'] = True
+                break
+    with open(json_file, 'w') as f:
+        json.dump(data, f, indent=2)
 
 def folder_selection(path):
     print("Choose an option:")
     print("1. Upload all folders")
     print("2. Upload a specific folder")
 
-    choice = input(f"{Fore.LIGHTGREEN_EX}Enter your choice (1 or 2): ")
+    choice = input(f"{Fore.LIGHTGREEN_EX}Enter your choice (1 or 2): {Fore.RESET}")
 
     if choice == '1':
-        print("Uploading all folders...")
-        upload_commands = []
+        print(f"{Fore.LIGHTYELLOW_EX}Uploading all folders...")
+        json_file_path = "download_logs.json"
+        folders_to_upload = []
+        with open(json_file_path, 'r') as f:
+            data = json.load(f)
+            for folder in data:
+                if folder.get('upload_success') == False:
+                    folders_to_upload.append(folder.get('seq_id'))
+
         for folder_name in os.listdir(path):
             folder_path = os.path.join(path, folder_name)
-            if len(os.listdir(folder_path)) < 5: continue
-            upload_command = f"mapilio_kit upload --processed {folder_path}"
-            upload_commands.append(upload_command)
+            if len(os.listdir(folder_path)) < 5:
+                continue
 
-        for command in upload_commands:
-            os.system(command)
+            folder_name_numeric = ''.join(filter(str.isdigit, folder_name))
+
+            if folder_name_numeric in folders_to_upload:
+                upload_command = f"mapilio_kit upload --processed {folder_path}"
+                os.system(upload_command)
+
+                update_folder_status(folder_name_numeric, json_file_path)
+
+        print(f"{Fore.LIGHTGREEN_EX}All folders uploaded. 🎉")
 
     elif choice == '2':
-
         print(f"{Fore.BLUE}Available folders: {Fore.RESET}")
         print_folder_structure(path)
 
@@ -131,7 +153,17 @@ def folder_selection(path):
         print(f"{Fore.YELLOW}Uploading folder '{folder_name_numeric}'... {Fore.RESET}")
 
         upload_command = f"mapilio_kit upload --processed {path + '/' + folder_name_numeric}"
+        json_file_path = "download_logs.json"
+        with open(json_file_path, 'r') as f:
+            data = json.load(f)
+            for folder in data:
+                 if folder.get('upload_success') == True:
+                     print(f"{Fore.LIGHTGREEN_EX}Folder '{folder_name_numeric}' already uploaded 🎉.{Fore.RESET}")
+                     folder_selection(path)
+
         os.system(upload_command)
+        update_folder_status(folder_name_numeric, json_file_path)
+        folder_selection(path)
 
     else:
         print(f"{Fore.RED}Invalid choice. Please enter 1 or 2.{Fore.RESET}")
