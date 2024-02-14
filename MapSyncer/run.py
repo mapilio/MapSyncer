@@ -121,7 +121,7 @@ def folder_selection(path):
 
     if choice == '1':
         print(f"{Fore.LIGHTYELLOW_EX}Uploading all folders...")
-        json_file_path = "download_logs.json"
+        json_file_path = ".download_logs.json"
         folders_to_upload = []
         with open(json_file_path, 'r') as f:
             data = json.load(f)
@@ -153,7 +153,7 @@ def folder_selection(path):
         print(f"{Fore.YELLOW}Uploading folder '{folder_name_numeric}'... {Fore.RESET}")
 
         upload_command = f"mapilio_kit upload --processed {path + '/' + folder_name_numeric}"
-        json_file_path = "download_logs.json"
+        json_file_path = ".download_logs.json"
         with open(json_file_path, 'r') as f:
             data = json.load(f)
             for folder in data:
