@@ -12,6 +12,12 @@ from storage import Storage
 from osc_api_config import OSCAPISubDomain
 from osc_api_models import OSCSequence, OSCPhoto, OSCUser
 from colorama import Fore, init
+import json
+import subprocess
+import platform
+import psutil
+from tqdm import tqdm
+
 
 LOGGER = logging.getLogger('osc_tools.osc_api_gateway')
 
@@ -141,10 +147,16 @@ class OSCApi:
     def __init__(self, env: OSCAPISubDomain):
         self.environment = env
 
-    def calculate_disk_space(self, total_items):
-        result = total_items * 2 / 1024
+    def calculate_disk_space(self, total_items,path):
+        def _get_free_space_gb(path):
+            disk_usage = psutil.disk_usage(path)
+            free_space_gb = disk_usage.free / (2 ** 30)
+            return free_space_gb
+
+        result = (total_items * 1.5 / 1024)
         print(
-            f"Approximately maximum disk space to be utilized {Fore.LIGHTYELLOW_EX}{result.real:.2f}GB{Fore.RESET} of disk space. Please make sure you have your average disk space")
+            f"{Fore.LIGHTGREEN_EX}Approximately {Fore.LIGHTYELLOW_EX}{result.real:.2f} GB {Fore.LIGHTGREEN_EX}space to be used{Fore.RESET}.\n"
+            f"{Fore.LIGHTGREEN_EX}Your disk has {Fore.LIGHTYELLOW_EX}{_get_free_space_gb(path):.2f} GB{Fore.RESET}{Fore.LIGHTGREEN_EX} of free space, do you want to continue?")
         choice = input(f"{Fore.LIGHTBLUE_EX}Do you want to continue? (yes/no): ").lower()
         if choice == 'yes' or choice == 'y':
             print(f"{Fore.LIGHTGREEN_EX}Ongoing...")
@@ -153,8 +165,7 @@ class OSCApi:
             exit()
         else:
             print("Invalid choice!")
-            self.calculate_disk_space(total_items)
-
+            self.calculate_disk_space(total_items, path)
 
     @classmethod
     def __upload_response_success(cls, response: requests.Response,
@@ -190,9 +201,9 @@ class OSCApi:
             return False
         return False
 
-    def _sequence_page(self, user_name, page) -> Tuple[List[OSCSequence], Exception]:
+    def _sequence_page(self, user_name, page, pbar) -> Tuple[List[OSCSequence], Exception]:
         try:
-            parameters = {'ipp': 100,
+            parameters = {'ipp': 500,
                           'page': page,
                           'username': user_name}
             login_url = OSCApiMethods.user_sequences(self.environment)
@@ -205,6 +216,9 @@ class OSCApi:
                 for item in items:
                     sequence = OSCSequence.sequence_from_json(item)
                     sequences.append(sequence)
+
+            # Update the progress bar once per page
+            pbar.update(1)
 
             return sequences, None
         except requests.RequestException as ex:
@@ -321,25 +335,37 @@ class OSCApi:
             return ex
         return None
 
-    def user_sequences(self, user_name: str) -> Tuple[List[OSCSequence], Exception]:
+    def user_sequences(self, user_name: str,to_path: str) -> Tuple[List[OSCSequence], Exception]:
         """get all tracks for a user id """
         print(f"Getting all sequences for user:{Fore.BLUE} {user_name}{Fore.RESET} from KartaView. It can take a while according to the number of sequences.")
-        try:
-            parameters = {'ipp': 100,
-                          'page': 1,
-                          'username': user_name}
-            json_response = requests.post(url=OSCApiMethods.user_sequences(self.environment),
-                                          data=parameters).json()
-        except requests.RequestException as ex:
-            return None, ex
+        parameters = {'ipp': 500,
+                      'page': 1,
+                      'username': user_name}
+        sequences_json = f".sequences_{user_name}.json"
+        if not os.path.isfile(sequences_json):
+            try:
+                json_response = requests.post(url=OSCApiMethods.user_sequences(self.environment),
+                                              data=parameters).json()
+                with open(sequences_json, "w") as f:
+                    json.dump(json_response, f)
+
+                    if platform.system() == "Windows":
+                        subprocess.check_call(["attrib", "+H", sequences_json])
+
+            except requests.RequestException as ex:
+                return None, ex
+        else:
+            with open(sequences_json, "r") as f:
+                json_response = json.load(f)
+
         if 'totalFilteredItems' not in json_response:
             return [], Exception("OSC API bug missing totalFilteredItems from response")
 
         total_items = int(json_response['totalFilteredItems'][0])
         pages_count = int(total_items / parameters['ipp']) + 1
-        print(f"{Fore.BLUE}Total count of images: {Fore.LIGHTBLUE_EX}{total_items}{Fore.RESET} {Fore.BLUE}Total count of sequences: {Fore.LIGHTBLUE_EX}{pages_count}")
+        print(f"{Fore.BLUE}Total count of images: {Fore.LIGHTBLUE_EX}{total_items}{Fore.RESET}{Fore.BLUE} Total count of pages: {Fore.LIGHTBLUE_EX}{pages_count}")
 
-        self.calculate_disk_space(total_items)
+        self.calculate_disk_space(total_items,to_path)
 
         sequences = []
         if 'currentPageItems' in json_response:
@@ -348,9 +374,10 @@ class OSCApi:
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
             loop = asyncio.new_event_loop()
+            pbar = tqdm(total=pages_count - 1)  # Total is pages_count - 1 because range starts from 2
             futures = [
                 loop.run_in_executor(executor,
-                                     self._sequence_page, user_name, page)
+                                     self._sequence_page, user_name, page, pbar)
                 for page in range(2, pages_count + 1)
             ]
             if not futures:
@@ -358,6 +385,7 @@ class OSCApi:
                 return sequences, None
 
             done = loop.run_until_complete(asyncio.gather(*futures))
+            pbar.close()
             loop.close()
 
             for sequence_page_return in done:
