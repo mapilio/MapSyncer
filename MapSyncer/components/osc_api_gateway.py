@@ -18,7 +18,6 @@ import platform
 import psutil
 from tqdm import tqdm
 
-
 LOGGER = logging.getLogger('osc_tools.osc_api_gateway')
 
 
@@ -147,7 +146,7 @@ class OSCApi:
     def __init__(self, env: OSCAPISubDomain):
         self.environment = env
 
-    def calculate_disk_space(self, total_items,path):
+    def calculate_disk_space(self, total_items, path):
         def _get_free_space_gb(path):
             disk_usage = psutil.disk_usage(path)
             free_space_gb = disk_usage.free / (2 ** 30)
@@ -220,7 +219,7 @@ class OSCApi:
             # Update the progress bar once per page
             pbar.update(1)
 
-            return sequences, None
+            return sequences, json_response, None
         except requests.RequestException as ex:
             return None, ex
 
@@ -335,37 +334,49 @@ class OSCApi:
             return ex
         return None
 
-    def user_sequences(self, user_name: str,to_path: str) -> Tuple[List[OSCSequence], Exception]:
+    def user_sequences(self, user_name: str, to_path: str) -> Tuple[List[OSCSequence], Exception]:
+        merged_json = f".{user_name}_merged_response.json"
+        if not os.path.exists(merged_json):
+            sequences, error = self._user_sequences(user_name, to_path)
+        else:
+            sequences = []
+            with open(merged_json, 'r') as f:
+                responses = json.load(f)
+            for r in responses:
+                response = responses[r]
+                if 'currentPageItems' in response:
+                    items = response['currentPageItems']
+                    for item in items:
+                        sequence = OSCSequence.sequence_from_json(item)
+                        sequences.append(sequence)
+            error = None
+        return sequences, error
+
+    def _user_sequences(self, user_name: str, to_path: str) -> Tuple[List[OSCSequence], Exception]:
         """get all tracks for a user id """
-        print(f"Getting all sequences for user:{Fore.BLUE} {user_name}{Fore.RESET} from KartaView. It can take a while according to the number of sequences.")
+        merged_json_response = {}
+        print(
+            f"Getting all sequences for user:{Fore.BLUE} {user_name}{Fore.RESET} from KartaView. It can take a while according to the number of sequences.")
         parameters = {'ipp': 500,
                       'page': 1,
                       'username': user_name}
-        sequences_json = f".sequences_{user_name}.json"
-        if not os.path.isfile(sequences_json):
-            try:
-                json_response = requests.post(url=OSCApiMethods.user_sequences(self.environment),
-                                              data=parameters).json()
-                with open(sequences_json, "w") as f:
-                    json.dump(json_response, f)
+        try:
+            json_response = requests.post(url=OSCApiMethods.user_sequences(self.environment),
+                                          data=parameters).json()
+            merged_json_response.update({'0': json_response})
 
-                    if platform.system() == "Windows":
-                        subprocess.check_call(["attrib", "+H", sequences_json])
-
-            except requests.RequestException as ex:
-                return None, ex
-        else:
-            with open(sequences_json, "r") as f:
-                json_response = json.load(f)
+        except requests.RequestException as ex:
+            return None, ex
 
         if 'totalFilteredItems' not in json_response:
             return [], Exception("OSC API bug missing totalFilteredItems from response")
 
         total_items = int(json_response['totalFilteredItems'][0])
         pages_count = int(total_items / parameters['ipp']) + 1
-        print(f"{Fore.BLUE}Total count of images: {Fore.LIGHTBLUE_EX}{total_items}{Fore.RESET}{Fore.BLUE} Total count of pages: {Fore.LIGHTBLUE_EX}{pages_count}")
+        print(
+            f"{Fore.BLUE}Total count of images: {Fore.LIGHTBLUE_EX}{total_items}{Fore.RESET}{Fore.BLUE} Total count of pages: {Fore.LIGHTBLUE_EX}{pages_count}")
 
-        self.calculate_disk_space(total_items,to_path)
+        self.calculate_disk_space(total_items, to_path)
 
         sequences = []
         if 'currentPageItems' in json_response:
@@ -374,12 +385,14 @@ class OSCApi:
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
             loop = asyncio.new_event_loop()
+            print(f"{Fore.LIGHTCYAN_EX}Fetching from Kartaview is a singular event. Future synchronizations will be completed more swiftly. Feel free to focus on other tasks while we handle this for you ☕️.{Fore.RESET}")
             pbar = tqdm(total=pages_count - 1)  # Total is pages_count - 1 because range starts from 2
             futures = [
                 loop.run_in_executor(executor,
                                      self._sequence_page, user_name, page, pbar)
                 for page in range(2, pages_count + 1)
             ]
+
             if not futures:
                 loop.close()
                 return sequences, None
@@ -388,13 +401,16 @@ class OSCApi:
             pbar.close()
             loop.close()
 
-            for sequence_page_return in done:
+            for idx, sequence_page_return in enumerate(done):
                 # sequence_page method will return a tuple the first element
                 # is a list of sequences
+
+                merged_json_response.update({str(idx + 1): sequence_page_return[1]})
+
                 sequences = sequences + sequence_page_return[0]
-
+            with open(f".{user_name}_merged_response.json", "w") as file:
+                json.dump(merged_json_response, file)
             return sequences, None
-
 
     def sequence_link(self, sequence) -> str:
         """This method will return a link to OSC website page displaying the sequence
