@@ -89,7 +89,7 @@ class LoginController:
         if isinstance(error, urllib.error.HTTPError):
             LOGGER.warning("Can't get osm id")
             LOGGER.warning("Please report this issue with the error code on "
-                           "https://github.com/openstreetcam/upload-scripts")
+                           "https://github.com/mapilio/MapSyncer")
             LOGGER.warning(error.code)
             LOGGER.warning(error.read())
             sys.exit()
@@ -102,7 +102,7 @@ class LoginController:
         else:
             LOGGER.warning("Error message: %s", str(error))
             LOGGER.warning("Please report this issue with the error message"
-                           "https://github.com/openstreetcam/upload-scripts")
+                           "https://github.com/mapilio/MapSyncer")
             sys.exit()
 
     @classmethod
@@ -117,7 +117,7 @@ class LoginController:
         LOGGER.warning("Can't get osc authorization right now please try again "
                        "or if you already did this.")
         LOGGER.warning("Please report this issue with the error message on "
-                       "https://github.com/openstreetcam/upload-scripts")
+                       "https://github.com/mapilio/MapSyncer")
         LOGGER.warning(exception)
         sys.exit()
 

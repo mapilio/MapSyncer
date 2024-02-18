@@ -93,7 +93,6 @@ def get_exif(seq_id, sequence_path, lth_images):
     url_details = f"https://api.openstreetcam.org/details"
 
     params = {
-        'access_token': access_token,
         'id': seq_id
     }
 
@@ -101,10 +100,21 @@ def get_exif(seq_id, sequence_path, lth_images):
     try:
         response_photos = requests.get(url)
         response_details = requests.post(url_details, data=params)
-        response_photos.raise_for_status()
 
         api_data_photos = response_photos.json()
         api_data_details = response_details.json()
+
+        if response_details.status_code != 200 or response_photos.status_code != 200:
+            print(f"\n{Fore.RED}Operation of sequence id: '{seq_id}' was skipped due to a '{response_details.status_code}' status code error.{Fore.RESET}")
+            json_file = ".download_logs.json"
+            with open(json_file, 'r') as f:
+                data = json.load(f)
+            for item in data:
+                if item.get('seq_id') == seq_id:
+                    item['json_success'] = False
+            with open(json_file, 'w') as f:
+                json.dump(data, f)
+            return sequence_path
 
         if 'result' in api_data_photos and 'data' in api_data_photos['result']:
             mapilio_description = []
@@ -203,6 +213,14 @@ def get_exif(seq_id, sequence_path, lth_images):
             save_path = os.path.join(sequence_path, 'mapilio_image_description.json')
             with open(save_path, 'w') as outfile:
                 json.dump(mapilio_description, outfile)
+            json_file = ".download_logs.json"
+            with open(json_file, 'r') as f:
+                data = json.load(f)
+            for item in data:
+                if item.get('seq_id') == seq_id:
+                    item['json_success'] = True
+            with open(json_file, 'w') as f:
+                json.dump(data, f)
         else:
             print("No 'data' key found in the JSON response.")
 
