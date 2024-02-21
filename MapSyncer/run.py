@@ -123,10 +123,14 @@ def folder_selection(path):
         print(f"{Fore.LIGHTYELLOW_EX}Uploading all folders...")
         json_file_path = ".download_logs.json"
         folders_to_upload = []
+
         with open(json_file_path, 'r') as f:
             data = json.load(f)
             for folder in data:
-                if folder.get('upload_success') == False:
+                if not folder.get('json_success'):
+                    print(f"{Fore.RED}The json file of the file with sequence id: {folder['seq_id']} was not found, please download the folder again.")
+                    continue
+                elif not folder.get('upload_success'):
                     folders_to_upload.append(folder.get('seq_id'))
 
         for folder_name in os.listdir(path):
@@ -138,10 +142,13 @@ def folder_selection(path):
 
             if folder_name_numeric in folders_to_upload:
                 upload_command = f"mapilio_kit upload --processed {folder_path}"
-                os.system(upload_command)
+                result = os.system(upload_command)
+
+                if result != 0:
+                    print(f"{Fore.RED}Error occurred while uploading {folder_path}")
+                    continue
 
                 update_folder_status(folder_name_numeric, json_file_path)
-
         print(f"{Fore.LIGHTGREEN_EX}All folders uploaded. 🎉")
 
     elif choice == '2':
@@ -157,12 +164,20 @@ def folder_selection(path):
         with open(json_file_path, 'r') as f:
             data = json.load(f)
             for folder in data:
-                 if folder.get('upload_success') == True:
-                     print(f"{Fore.LIGHTGREEN_EX}Folder '{folder_name_numeric}' already uploaded 🎉.{Fore.RESET}")
-                     folder_selection(path)
+                if folder.get('seq_id') == folder_name_numeric:
+                    if folder.get('upload_success') == True:
+                        print(f"{Fore.LIGHTGREEN_EX}Folder '{folder_name_numeric}' was already uploaded 🎉.{Fore.RESET}")
+                        folder_selection(path)
+                    elif folder.get('json_success') == False:
+                        print(f"{Fore.RED}The json file of the file with sequence id: {folder['seq_id']} was not found, please download the folder again.")
+                        folder_selection(path)
+        result = os.system(upload_command)
 
-        os.system(upload_command)
-        update_folder_status(folder_name_numeric, json_file_path)
+        if result != 0:
+            print(f"{Fore.RED}Error occurred while uploading {folder_name_numeric}")
+        else:
+            update_folder_status(folder_name_numeric, json_file_path)
+
         folder_selection(path)
 
     else:
