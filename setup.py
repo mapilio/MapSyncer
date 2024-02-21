@@ -24,7 +24,8 @@ INSTALL_REQUIRES = [
     'requests_oauthlib',
     'opencv-python',
     'imagesize',
-    'setuptools'
+    'setuptools',
+    'psutil'
 ]
 
 setuptools.setup(
