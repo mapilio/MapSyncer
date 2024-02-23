@@ -5,6 +5,7 @@ import json
 import cv2
 import string
 from colorama import Fore, Style, init
+import version_
 from calculation.distance import Distance
 
 
@@ -177,7 +178,7 @@ def get_exif(seq_id, sequence_path, lth_images):
                     "captureTime": api_photo_data["shotDate"],
                     "altitude": 0,
                     "sequenceUuid": current_unique_id,
-                    "source": "KartaView",
+                    "source": f"KartaView-v{version_.__version__}",
                     "sourceUser": api_data_details.get("osv", {}).get("user"),
                     "heading": float(api_photo_data["heading"]) if api_photo_data.get("heading") is not None else 0,
                     "orientation": 1,
