@@ -166,7 +166,7 @@ def folder_selection(path):
             for folder in data:
                 if folder.get('seq_id') == folder_name_numeric:
                     if folder.get('upload_success') == True:
-                        print(f"{Fore.LIGHTGREEN_EX}Folder '{folder_name_numeric}' already uploaded 🎉.{Fore.RESET}")
+                        print(f"{Fore.LIGHTGREEN_EX}Folder '{folder_name_numeric}' was already uploaded 🎉.{Fore.RESET}")
                         folder_selection(path)
                     elif folder.get('json_success') == False:
                         print(f"{Fore.RED}The json file of the file with sequence id: {folder['seq_id']} was not found, please download the folder again.")
