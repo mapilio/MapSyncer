@@ -69,7 +69,7 @@ def display_sequence():
 
     if response_data is None:
         message = "No data available. Please check the terminal for further details."
-        return render_template('details.html', message=message)
+        return render_template('display-sequence.html', message=message)
 
     download_logs = load_data() or []
 

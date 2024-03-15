@@ -35,6 +35,9 @@ def main():
         print(f"{Fore.RED}Unable to fetch the latest MapSyncer version information.\n")
 
     init_colorama()
+    print(f"{Fore.LIGHTCYAN_EX}To access the web interface of MapSyncer, simply navigate to the following URL:\n"
+          f"http://localhost:5050/ in your web browser's address bar.\n{Fore.RESET}")
+
     folder_path = input(f"{Fore.LIGHTYELLOW_EX}Please enter the path to the folder to download images to:\n{Fore.RESET}")
     folder_path = folder_path.strip('\'"')
 
