@@ -76,6 +76,7 @@ def get_api_access_token():
         print(f"Error decoding JSON in {credentials_file_path}: {e}")
         return None
 
+
 def get_exif(seq_id, sequence_path, lth_images):
     """
     This function gets the exif data from the OpenStreetCam API and saves it to a JSON file.
@@ -90,140 +91,162 @@ def get_exif(seq_id, sequence_path, lth_images):
         print("Access token not found. Please check your credentials.")
         return sequence_path
 
-    url = f"https://api.openstreetcam.org/2.0/photo/?access_token={access_token}&sequenceId={seq_id}"
     url_details = f"https://api.openstreetcam.org/details"
-
     params = {
         'id': seq_id
     }
-
-
+    mapilio_description = []
+    page_count = 1
     try:
-        response_photos = requests.get(url)
-        response_details = requests.post(url_details, data=params)
+        hasMoreData = True
+        processed_count = 0
 
-        api_data_photos = response_photos.json()
+        response_details = requests.post(url_details, data=params)
         api_data_details = response_details.json()
 
-        if response_details.status_code != 200 or response_photos.status_code != 200:
-            print(f"\n{Fore.RED}Operation of sequence id: '{seq_id}' was skipped due to a '{response_details.status_code}' status code error.{Fore.RESET}")
-            json_file = ".download_logs.json"
-            with open(json_file, 'r') as f:
-                data = json.load(f)
-            for item in data:
-                if item.get('seq_id') == seq_id:
-                    item['json_success'] = False
-            with open(json_file, 'w') as f:
-                json.dump(data, f)
-            return sequence_path
+        while hasMoreData:
+            url = f"https://api.openstreetcam.org/2.0/photo/?access_token={access_token}&sequenceId={seq_id}&page={page_count}"
+            response_photos = requests.get(url)
+            api_data_photos = response_photos.json()
 
-        if 'result' in api_data_photos and 'data' in api_data_photos['result']:
-            mapilio_description = []
+            if response_details.status_code != 200 or response_photos.status_code != 200:
+                print(
+                    f"\n{Fore.RED}Operation of sequence id: '{seq_id}' was skipped due to a '{response_details.status_code}' status code error.{Fore.RESET}")
+                json_file = ".download_logs.json"
+                with open(json_file, 'r') as f:
+                    data = json.load(f)
+                for item in data:
+                    if item.get('seq_id') == seq_id:
+                        item['json_success'] = False
+                with open(json_file, 'w') as f:
+                    json.dump(data, f)
+                return sequence_path
 
-            vfov = 0
-            fov = 0
-            fLen = 0
+            if 'result' in api_data_photos and 'data' in api_data_photos['result']:
 
-            for idx,api_photo_data in enumerate(api_data_photos['result']['data']):
-                curr_lat=float(api_photo_data["matchLat"]) if api_photo_data.get("matchLat") is not None else float(api_photo_data["lat"])
-                curr_lon=float(api_photo_data["matchLng"]) if api_photo_data.get("matchLng") is not None else float(api_photo_data["lng"])
-                if idx + 2 < len(api_data_photos['result']['data']) and idx > 1: # cannot use idx + 1 ,idx >0 in this condition. in this situation the last and first items that should not stand alone in sequence.
-                    prev_lat=float(api_data_photos['result']['data'][idx-1]["matchLat"]) if api_data_photos['result']['data'][idx-1].get("matchLat") is not None else float(api_data_photos['result']['data'][idx-1]["lat"])
-                    next_lat=float(api_data_photos['result']['data'][idx+1]["matchLat"]) if api_data_photos['result']['data'][idx+1].get("matchLat") is not None else float(api_data_photos['result']['data'][idx+1]["lat"])
-                    prev_lon=float(api_data_photos['result']['data'][idx-1]["matchLng"]) if api_data_photos['result']['data'][idx-1].get("matchLng") is not None else float(api_data_photos['result']['data'][idx-1]["lng"])
-                    next_lon=float(api_data_photos['result']['data'][idx+1]["matchLng"]) if api_data_photos['result']['data'][idx+1].get("matchLng") is not None else float(api_data_photos['result']['data'][idx+1]["lng"])
-                    situation=check_seq(prev_lon,prev_lat,curr_lon,curr_lat,next_lon,next_lat)
-                else: situation=False
-                if idx % 250 == 0 or situation:
-                    current_unique_id = unique_sequence_id_generator(letter_count=8, digit_count=4)
+                vfov = 0
+                fov = 0
+                fLen = 0
 
-                absolute_path = os.path.abspath(f'{sequence_path}/{api_photo_data["name"]}')
-                if absolute_path in lth_images:
-                    img = cv2.imread(absolute_path)
-                    api_photo_data["width"]=str(img.shape[1])
-                    api_photo_data["height"]=str(img.shape[0])
+                for idx, api_photo_data in enumerate(api_data_photos['result']['data']):
+                    curr_lat = float(api_photo_data["matchLat"]) if api_photo_data.get(
+                        "matchLat") is not None else float(api_photo_data["lat"])
+                    curr_lon = float(api_photo_data["matchLng"]) if api_photo_data.get(
+                        "matchLng") is not None else float(api_photo_data["lng"])
+                    if idx + 2 < len(api_data_photos['result'][
+                                         'data']) and idx > 1:  # cannot use idx + 1 ,idx >0 in this condition. in this situation the last and first items that should not stand alone in sequence.
+                        prev_lat = float(api_data_photos['result']['data'][idx - 1]["matchLat"]) if \
+                        api_data_photos['result']['data'][idx - 1].get("matchLat") is not None else float(
+                            api_data_photos['result']['data'][idx - 1]["lat"])
+                        next_lat = float(api_data_photos['result']['data'][idx + 1]["matchLat"]) if \
+                        api_data_photos['result']['data'][idx + 1].get("matchLat") is not None else float(
+                            api_data_photos['result']['data'][idx + 1]["lat"])
+                        prev_lon = float(api_data_photos['result']['data'][idx - 1]["matchLng"]) if \
+                        api_data_photos['result']['data'][idx - 1].get("matchLng") is not None else float(
+                            api_data_photos['result']['data'][idx - 1]["lng"])
+                        next_lon = float(api_data_photos['result']['data'][idx + 1]["matchLng"]) if \
+                        api_data_photos['result']['data'][idx + 1].get("matchLng") is not None else float(
+                            api_data_photos['result']['data'][idx + 1]["lng"])
+                        situation = check_seq(prev_lon, prev_lat, curr_lon, curr_lat, next_lon, next_lat)
+                    else:
+                        situation = False
+                    if idx % 250 == 0 or situation:
+                        current_unique_id = unique_sequence_id_generator(letter_count=8, digit_count=4)
 
-                if api_data_details["osv"]["cameraParameters"] is not None:
-                    vfov = api_data_details["osv"]["cameraParameters"]["vFoV"]
-                    fov = api_data_details["osv"]["cameraParameters"]["hFoV"]
-                    fLen = api_data_details["osv"]["cameraParameters"]["fLen"]
+                    absolute_path = os.path.abspath(f'{sequence_path}/{api_photo_data["name"]}')
+                    if absolute_path in lth_images:
+                        img = cv2.imread(absolute_path)
+                        api_photo_data["width"] = str(img.shape[1])
+                        api_photo_data["height"] = str(img.shape[0])
 
-                device_name = api_data_details.get("osv", {}).get("deviceName", "")
-                platform = api_data_details.get("osv", {}).get("platform")
+                    if api_data_details["osv"]["cameraParameters"] is not None:
+                        vfov = api_data_details["osv"]["cameraParameters"]["vFoV"]
+                        fov = api_data_details["osv"]["cameraParameters"]["hFoV"]
+                        fLen = api_data_details["osv"]["cameraParameters"]["fLen"]
 
-                if platform == "iOS" or "iPhone" in platform:
-                    device_make = "Apple"
-                    device_model = device_name.split(",")[0].replace("iPhone", "iPhone ")
+                    device_name = api_data_details.get("osv", {}).get("deviceName", "")
+                    platform = api_data_details.get("osv", {}).get("platform")
 
-                elif platform == "Android" and " " in device_name:
-                    device_make = device_name.split(" ")[0]
-                    device_model = device_name.split(" ", 1)[1]
+                    if platform == "iOS" or "iPhone" in platform:
+                        device_make = "Apple"
+                        device_model = device_name.split(",")[0].replace("iPhone", "iPhone ")
 
-                elif platform == "samsung":
-                    device_make = "Samsung"
-                    device_model = device_name
+                    elif platform == "Android" and " " in device_name:
+                        device_make = device_name.split(" ")[0]
+                        device_model = device_name.split(" ", 1)[1]
 
-                elif platform == "GoPro":
-                    device_make = "GoPro"
-                    device_model = device_name
+                    elif platform == "samsung":
+                        device_make = "Samsung"
+                        device_model = device_name
 
-                else:
-                    device_make = "Unknown"
-                    device_model = "Unknown"
+                    elif platform == "GoPro":
+                        device_make = "GoPro"
+                        device_model = device_name
 
-                photo_data = \
-                {
-                    "latitude": float(api_photo_data["matchLat"]) if api_photo_data.get("matchLat") is not None else float(api_photo_data["lat"]),
-                    "longitude": float(api_photo_data["matchLng"]) if api_photo_data.get("matchLng") is not None else float(api_photo_data["lng"]),
-                    "captureTime": api_photo_data["shotDate"],
-                    "altitude": 0,
-                    "sequenceUuid": current_unique_id,
-                    "source": f"KartaView-v{version_.__version__}",
-                    "sourceUser": api_data_details.get("osv", {}).get("user"),
-                    "heading": float(api_photo_data["heading"]) if api_photo_data.get("heading") is not None else 0,
-                    "orientation": 1,
-                    "roll": 0,
-                    "pitch": 0,
-                    "yaw": 0,
-                    "carSpeed": 0,
-                    "deviceMake": device_make,
-                    "deviceModel": device_model,
-                    "imageSize": api_photo_data["width"] + "x" + api_photo_data["height"],
-                    "fov": fov,
-                    "megapixels": 0,
-                    "vfov": vfov,
-                    "focalLength": fLen,
-                    "filename": api_photo_data["name"],
-                    "accuracy_level": float(api_photo_data["gpsAccuracy"]) if api_photo_data.get("gpsAccuracy") is not None else None,
-                    "path": ""
-                }
+                    else:
+                        device_make = "Unknown"
+                        device_model = "Unknown"
 
-                mapilio_description.append(photo_data)
-            processed = len(mapilio_description)
-            description_information = {
-                "Information": {
-                    "total_images": processed,
-                    "processed_images": processed,
-                    "failed_images": 0,
-                    "duplicated_images": 0,
-                    "id": "8323ff0a01fe49d1b55e610279f62828",
-                    "device_type": "Desktop"
-                }
+                    photo_data = \
+                        {
+                            "latitude": float(api_photo_data["matchLat"]) if api_photo_data.get(
+                                "matchLat") is not None else float(api_photo_data["lat"]),
+                            "longitude": float(api_photo_data["matchLng"]) if api_photo_data.get(
+                                "matchLng") is not None else float(api_photo_data["lng"]),
+                            "captureTime": api_photo_data["shotDate"],
+                            "altitude": 0,
+                            "sequenceUuid": current_unique_id,
+                            "source": f"KartaView-v{version_.__version__}",
+                            "sourceUser": api_data_details.get("osv", {}).get("user"),
+                            "heading": float(api_photo_data["heading"]) if api_photo_data.get(
+                                "heading") is not None else 0,
+                            "orientation": 1,
+                            "roll": 0,
+                            "pitch": 0,
+                            "yaw": 0,
+                            "carSpeed": 0,
+                            "deviceMake": device_make,
+                            "deviceModel": device_model,
+                            "imageSize": api_photo_data["width"] + "x" + api_photo_data["height"],
+                            "fov": fov,
+                            "megapixels": 0,
+                            "vfov": vfov,
+                            "focalLength": fLen,
+                            "filename": api_photo_data["name"],
+                            "accuracy_level": float(api_photo_data["gpsAccuracy"]) if api_photo_data.get(
+                                "gpsAccuracy") is not None else None,
+                            "path": ""
+                        }
+
+                    mapilio_description.append(photo_data)
+                    processed_count += 1
+                page_count += 1
+                hasMoreData = api_data_photos['result'].get('hasMoreData', False)
+            else:
+                print("No 'data' key found in the JSON response.")
+
+        description_information = {
+            "Information": {
+                "total_images": processed_count,
+                "processed_images": processed_count,
+                "failed_images": 0,
+                "duplicated_images": 0,
+                "id": "8323ff0a01fe49d1b55e610279f62828",
+                "device_type": "Desktop"
             }
-            mapilio_description.append(description_information)
-            save_path = os.path.join(sequence_path, 'mapilio_image_description.json')
-            with open(save_path, 'w') as outfile:
-                json.dump(mapilio_description, outfile)
-            json_file = ".download_logs.json"
-            with open(json_file, 'r') as f:
-                data = json.load(f)
-            for item in data:
-                if item.get('seq_id') == seq_id:
-                    item['json_success'] = True
-            with open(json_file, 'w') as f:
-                json.dump(data, f)
-        else:
-            print("No 'data' key found in the JSON response.")
+        }
+        mapilio_description.append(description_information)
+        save_path = os.path.join(sequence_path, 'mapilio_image_description.json')
+        with open(save_path, 'w') as outfile:
+            json.dump(mapilio_description, outfile)
+        json_file = ".download_logs.json"
+        with open(json_file, 'r') as f:
+            data = json.load(f)
+        for item in data:
+            if item.get('seq_id') == seq_id:
+                item['json_success'] = True
+        with open(json_file, 'w') as f:
+            json.dump(data, f)
 
     except requests.exceptions.RequestException as e:
         print(f"Error making the request: {e}")
