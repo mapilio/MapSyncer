@@ -215,6 +215,8 @@ class OSCApi:
                 for item in items:
                     sequence = OSCSequence.sequence_from_json(item)
                     sequences.append(sequence)
+            else:
+                LOGGER.debug("No sequences found for user: %s", user_name)
 
             # Update the progress bar once per page
             pbar.update(1)
@@ -386,12 +388,14 @@ class OSCApi:
         with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
             loop = asyncio.new_event_loop()
             print(f"{Fore.LIGHTCYAN_EX}Fetching from Kartaview is a singular event. Future synchronizations will be completed more swiftly. Feel free to focus on other tasks while we handle this for you ☕️.{Fore.RESET}")
-            pbar = tqdm(total=pages_count - 1)  # Total is pages_count - 1 because range starts from 2
+            pbar = tqdm(total=30, desc="Fetching sequences")  # Total is pages_count - 1 because range starts from 2
             futures = [
                 loop.run_in_executor(executor,
                                      self._sequence_page, user_name, page, pbar)
-                for page in range(2, pages_count + 1)
+                for page in range(2, 30)
             ]
+            with open(f".{user_name}_merged_response.json", "w") as file:
+                json.dump(merged_json_response, file)
 
             if not futures:
                 loop.close()
