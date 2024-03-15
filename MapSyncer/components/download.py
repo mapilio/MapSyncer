@@ -5,6 +5,8 @@ This module is created in order to support the download of user uploaded data
 import logging
 import os
 import json
+import platform
+import subprocess
 from concurrent.futures import (
     as_completed,
     ThreadPoolExecutor,
@@ -21,17 +23,20 @@ from osc_api_gateway import OSCApi
 from osc_api_models import OSCPhoto
 from parsers.exif.exif import ExifParser
 from get_exif import get_exif
-from colorama import Fore, init
+from colorama import Fore
+progress = {}
 
 LOGGER = logging.getLogger('osc_tools.osc_utils')
 
 def check_sequence_status(sequence_id):
     log_file = ".download_logs.json"
     if os.path.exists(log_file):
+        if os.path.getsize(log_file) == 0:
+            return False
         with open(log_file, 'r') as f:
             log_data_list = json.load(f)
             for entry in log_data_list:
-                if entry["seq_id"] == sequence_id and entry["download_success"] and entry["upload_success"]:
+                if entry.get("seq_id") == sequence_id and entry.get("download_success") and entry.get("upload_success"):
                     return True
     return False
 
@@ -43,14 +48,14 @@ def select_sequences_to_download(sequences):
 
     while True:
         try:
-            selection = input(f"{Fore.LIGHTBLUE_EX}Enter the sequence numbers you want to download (comma-separated, a range such as 1-3, or 'all' for all sequences): {Fore.RESET}")
+            selection = input(
+                f"{Fore.LIGHTBLUE_EX}Enter the sequence numbers you want to download (comma-separated, a range such as 1-3, or 'all' for all sequences): {Fore.RESET}")
             if selection.lower() == "all":
                 return sequences
             selected_sequences = parse_selection(selection, sequences)
             if selected_sequences:
                 return selected_sequences
-            else:
-                print(f"{Fore.LIGHTRED_EX}Invalid selection. Please enter valid sequence numbers or 'all'.")
+            print(f"{Fore.LIGHTRED_EX}Invalid selection. Please enter valid sequence numbers or 'all'.")
         except EOFError:
             print("Input interrupted. Please provide valid input.")
 
@@ -83,20 +88,37 @@ def parse_selection(selection, sequences):
             return None
     return selected_sequences
 
-def download_user_images(to_path):
+def flask_app(folder_path):
+    login_controller = LoginController(OSCAPISubDomain.PRODUCTION)
+    user = login_controller.login()
+    command = f"python MapSyncer/app.py --username {user.name} --to_path {folder_path} "
+    if platform.system() == "Windows":
+        subprocess.Popen(['cmd', '/c', 'start', 'cmd', '/k', command])
+    elif platform.system() == "Linux":
+        subprocess.Popen(['gnome-terminal', '--', 'bash', '-c', f"{command}; read -p 'Press Enter to exit'"])
+    elif platform.system() == "Darwin":  # macOS
+        subprocess.Popen(['open', '-a', 'Terminal', 'app.py'])
+    else:
+        print("Unsupported operating system")
+
+
+def download_user_images(to_path, selected_sequences_id=None):
     login_controller = LoginController(OSCAPISubDomain.PRODUCTION)
     # login to get the valid user
     user = login_controller.login()
     osc_api = login_controller.osc_api
     # get all the sequneces for this user
-    sequences, error = osc_api.user_sequences(user.name,to_path)
+    sequences, error = osc_api.user_sequences(user.name, to_path)
 
     if error:
         print("Could not get sequences for the current user, try again or report a issue on "
-                    "github")
+              "github")
         return
-
-    selected_sequences = select_sequences_to_download(sequences)
+    if selected_sequences_id is None:
+        selected_sequences = select_sequences_to_download(sequences)
+    else:
+        selected_sequences = [sequence for sequence in sequences if sequence.online_id == selected_sequences_id]
+    # create the user directory
 
     user_dir_path = os.path.join(to_path)
     os.makedirs(user_dir_path, exist_ok=True)
@@ -109,11 +131,10 @@ def download_user_images(to_path):
         sequence_path = os.path.join(user_dir_path, str(sequence.online_id))
         os.makedirs(sequence_path, exist_ok=True)
         if not check_sequence_status(sequence.online_id):
-            download_success, _ , lth_images = _download_photo_sequence(osc_api,
-                                                           sequence,
-                                                           sequence_path,
-                                                           add_gps_to_exif=True)
-
+            download_success, photos, lth_images = _download_photo_sequence(osc_api,
+                                                                       sequence,
+                                                                       sequence_path,
+                                                                       add_gps_to_exif=True)
 
             if not download_success:
                 LOGGER.info("There was an error downloading the sequence: %s", str(sequence.online_id))
@@ -156,11 +177,15 @@ def _download_photo_sequence(osc_api: OSCApi,
                 lth_images.append(filePath)
             download_success = download_success and photo_success
             download_bar.update(1)
+            current_item_index = download_bar.n
+            progress[sequence.online_id] = current_item_index
+
     log_file = ".download_logs.json"
     log_data = {
         "seq_id": sequence.online_id,
         "download_success": download_success,
-        "upload_success": False
+        "upload_success": False,
+        "json_success": False
     }
 
     log_data_list = []
@@ -168,8 +193,11 @@ def _download_photo_sequence(osc_api: OSCApi,
         with open(log_file, 'r') as f:
             log_data_list = json.load(f)
 
-    is_duplicate = any(entry["seq_id"] == sequence.online_id for entry in log_data_list)
-    if not is_duplicate:
+    for entry in log_data_list:
+        if entry["seq_id"] == sequence.online_id:
+            entry["download_success"] = download_success
+            break
+    else:
         log_data_list.append(log_data)
 
     with open(log_file, 'w') as f:
@@ -178,7 +206,7 @@ def _download_photo_sequence(osc_api: OSCApi,
     if not download_success:
         LOGGER.info("Download failed for sequence %s", str(sequence.online_id))
         return False, [], []
-    return True, photos , lth_images
+    return True, photos, lth_images
 
 
 def _download_photo(photo: OSCPhoto,
@@ -187,10 +215,9 @@ def _download_photo(photo: OSCPhoto,
                     add_gps_to_exif: bool = False):
     photo_download_name = os.path.join(folder_path, str(photo._file_url.split("/")[-1].split(".")[0]) + ".jpg")
     local_storage = Local()
-    photo_success, error , file_path = osc_api.download_resource(photo.photo_url(),
-                                                     photo_download_name,
-                                                     local_storage)
-
+    photo_success, error, file_path = osc_api.download_resource(photo.photo_url(),
+                                                                photo_download_name,
+                                                                local_storage)
 
     if error or photo_success:
         LOGGER.debug("Failed to download image: %s", photo.photo_url())
@@ -204,4 +231,4 @@ def _download_photo(photo: OSCPhoto,
             item.timestamp = photo.timestamp
             parser.add_items([item])
             parser.serialize()
-    return photo_success, error , file_path
+    return photo_success, error, file_path
