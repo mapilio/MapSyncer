@@ -5,7 +5,6 @@ import argparse
 from dotenv import load_dotenv
 from flask import Flask, render_template, request, jsonify
 
-from mapilio_kit.components.uploader import uploadProgress
 from MapSyncer.components.download import download_user_images, check_sequence_status, progress
 from MapSyncer.components.osc_api_gateway import OSCApi
 from MapSyncer.components.osc_api_gateway import OSCAPISubDomain
@@ -197,11 +196,6 @@ def download_progress_bar():
     progress_value = progress.get(sequence_id, 0)
 
     return jsonify({"status": "success", "photos": len(photos), "progress": progress_value}), 200
-
-@app.route('/upload-progress-bar', methods=['POST'])
-def upload_progress_bar():
-    print(uploadProgress)
-    return jsonify({"status": "success", "progress": uploadProgress})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5050, threaded=True)

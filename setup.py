@@ -25,7 +25,10 @@ INSTALL_REQUIRES = [
     'opencv-python',
     'imagesize',
     'setuptools',
-    'psutil'
+    'psutil',
+    'flask',
+    'python-dotenv'
+
 ]
 
 setuptools.setup(
