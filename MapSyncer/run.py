@@ -1,14 +1,14 @@
 # run.py
 import os
-import sys
 import json
-
+from MapSyncer.app import app as flask_app
 from mapilio_kit.components.login import list_all_users
 from mapilio_kit.components.edit_config import edit_config
 from mapilio_kit.base import authenticator
-from .components.download import download_user_images
+from .components.download import download_user_images,flask_app
 import getpass
-from colorama import Fore, init
+from colorama import (Fore,
+                      init as init_colorama)
 import requests
 from .components.version_ import __version__
 
@@ -34,19 +34,17 @@ def main():
     else:
         print(f"{Fore.RED}Unable to fetch the latest MapSyncer version information.\n")
 
-    init()
+    init_colorama()
     folder_path = input(f"{Fore.LIGHTYELLOW_EX}Please enter the path to the folder to download images to:\n{Fore.RESET}")
     folder_path = folder_path.strip('\'"')
 
-    if 'mapilio_images' in folder_path:
-        download_user_images(folder_path)
-    else:
+    if 'mapilio_images' not in folder_path:
         folder_path = os.path.join(folder_path, 'mapilio_images')
-
         if not os.path.exists(folder_path):
             os.makedirs(folder_path)
 
-        download_user_images(folder_path)
+    flask_app(folder_path)
+    download_user_images(folder_path)
 
     check_authenticate = False
 
@@ -183,7 +181,6 @@ def folder_selection(path):
     else:
         print(f"{Fore.RED}Invalid choice. Please enter 1 or 2.{Fore.RESET}")
         folder_selection(path)
-
 
 if __name__ == "__main__":
     main()
