@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='mapilio_fav.png') }}">
+    <title>Sequence Edit</title>
+</head>
+<body>
+    
+    <div class="container">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary mt-4 rounded-4">
+            <a class="navbar-brand mx-4" href="#">MapSyncer</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarToggleExternalContent" aria-controls="navbarToggleExternalContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+    
+            <div class="collapse navbar-collapse" id="navbarToggleExternalContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 mx-4">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Display Sequence</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/details">Detailed</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/sequence-edit">Sequence Edit</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </div>
+
+    <div class="container mt-5">
+        <h1 class="mt-5 text-center mb-5">Sequence Edit</h1>
+        <div class="card text-white bg-secondary mb-3">
+          <div class="card-body">
+            <h5 class="card-title"><b>Note:</b> In some sequences, if you think that one of the operations listed below was not successful, select the operation and set the value to false. then restart the operation.</h5>
+          </div>
+            <h5 class="card-title bg-danger p-2 rounded mx-2"><b> Important:</b> It is not recommended to use it unless necessary.</h5>
+        </div>
+
+        <form class="mt-4 mb-4" onsubmit="updateJson(event)">
+            <div class="input-group mb-3">
+                <span class="input-group-text">Sequence ID:</span>
+                <input type="text" class="form-control" placeholder="Enter Seq ID" name="seq_id">
+            </div>
+            <div class="input-group mb-3">
+                <label class="input-group-text" for="key">Key to Update:</label>
+                <select class="form-select" id="key" name="key">
+                    <option value="download_success">Download Successful</option>
+                    <option value="upload_success">Upload Successful</option>
+                    <option value="json_success">JSON Fetching Successful</option>
+                </select>
+            </div>
+            <div class="input-group mb-3">
+                <label class="input-group-text" for="new_value">New Value:</label>
+                <select class="form-select" id="new_value" name="new_value">
+                    <option value="true">True</option>
+                    <option value="false">False</option>
+                </select>
+            </div>
+            <button class="btn btn-primary" type="submit">Update JSON</button>
+        </form>
+        <div id="alertContainer"></div>
+    </div>
+
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
