@@ -1,7 +1,6 @@
 # run.py
 import os
 import json
-from MapSyncer.app import app as flask_app
 from mapilio_kit.components.login import list_all_users
 from mapilio_kit.components.edit_config import edit_config
 from mapilio_kit.base import authenticator
@@ -35,19 +34,6 @@ def main():
         print(f"{Fore.RED}Unable to fetch the latest MapSyncer version information.\n")
 
     init_colorama()
-    print(f"{Fore.LIGHTCYAN_EX}To access the web interface of MapSyncer, simply navigate to the following URL:\n"
-          f"http://localhost:5050/ in your web browser's address bar.\n{Fore.RESET}")
-
-    folder_path = input(f"{Fore.LIGHTYELLOW_EX}Please enter the path to the folder to download images to:\n{Fore.RESET}")
-    folder_path = folder_path.strip('\'"')
-
-    if 'mapilio_images' not in folder_path:
-        folder_path = os.path.join(folder_path, 'mapilio_images')
-        if not os.path.exists(folder_path):
-            os.makedirs(folder_path)
-
-    flask_app(folder_path)
-    download_user_images(folder_path)
 
     check_authenticate = False
 
@@ -60,9 +46,19 @@ def main():
 
     if check_authenticate:
 
-        if folder_path is not None and len(os.listdir(folder_path)) == 0:
-            print(f"{Fore.RED}Something went wrong. Please check your destination path.{Fore.RESET}")
-            exit()
+        print(f"{Fore.LIGHTCYAN_EX}To access the web interface of MapSyncer, simply navigate to the following URL:\n"
+              f"http://localhost:5050/ in your web browser's address bar.\n{Fore.RESET}")
+
+        folder_path = input(f"{Fore.LIGHTYELLOW_EX}Please enter the path to the folder to download images to:\n{Fore.RESET}")
+        folder_path = folder_path.strip('\'"')
+
+        if 'mapilio_images' not in folder_path:
+            folder_path = os.path.join(folder_path, 'mapilio_images')
+            if not os.path.exists(folder_path):
+                os.makedirs(folder_path)
+
+        flask_app(folder_path)
+        download_user_images(folder_path)
 
         folder_selection(folder_path)
 
