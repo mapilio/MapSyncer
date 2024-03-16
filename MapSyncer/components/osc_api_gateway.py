@@ -337,12 +337,14 @@ class OSCApi:
         return None
 
     def user_sequences(self, user_name: str, to_path: str) -> Tuple[List[OSCSequence], Exception]:
-        merged_json = f".{user_name}_merged_response.json"
-        if not os.path.exists(merged_json):
+        current_directory = os.path.dirname(os.path.abspath(__file__))
+        parent_directory = os.path.dirname(current_directory)
+        sequence_json_path = os.path.join(parent_directory, f".{user_name}_merged_response.json")
+        if not os.path.exists(sequence_json_path):
             sequences, error = self._user_sequences(user_name, to_path)
         else:
             sequences = []
-            with open(merged_json, 'r') as f:
+            with open(sequence_json_path, 'r') as f:
                 responses = json.load(f)
             for r in responses:
                 response = responses[r]
@@ -394,7 +396,12 @@ class OSCApi:
                                      self._sequence_page, user_name, page, pbar)
                 for page in range(2, 30)
             ]
-            with open(f".{user_name}_merged_response.json", "w") as file:
+
+            current_directory = os.path.dirname(os.path.abspath(__file__))
+            parent_directory = os.path.dirname(current_directory)
+            sequence_json_path = os.path.join(parent_directory, f".{user_name}_merged_response.json")
+
+            with open(sequence_json_path, "w") as file:
                 json.dump(merged_json_response, file)
 
             if not futures:
@@ -412,7 +419,7 @@ class OSCApi:
                 merged_json_response.update({str(idx + 1): sequence_page_return[1]})
 
                 sequences = sequences + sequence_page_return[0]
-            with open(f".{user_name}_merged_response.json", "w") as file:
+            with open(sequence_json_path, "w") as file:
                 json.dump(merged_json_response, file)
             return sequences, None
 

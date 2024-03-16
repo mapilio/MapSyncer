@@ -37,7 +37,9 @@ def load_data():
 
 def get_sequences():
     user_name = args.username
-    with open(f'.{user_name}_merged_response.json', encoding='utf-8') as f:
+    current_directory = os.path.dirname(os.path.abspath(__file__))
+    sequence_json_path = os.path.join(current_directory, f".{user_name}_merged_response.json")
+    with open(sequence_json_path, encoding='utf-8') as f:
         response_data = json.load(f)
 
     sequence_list = []
@@ -46,8 +48,6 @@ def get_sequences():
         for eleman in i['currentPageItems']:
             sequence_list.append(eleman['id'])
     return sequence_list
-
-
 
 @app.route('/check-status/<sequence_id>', methods=['GET'])
 def check_status(sequence_id):
@@ -59,9 +59,11 @@ def check_status(sequence_id):
 def display_sequence():
     """Displays the sequence data"""
     user_name = args.username
+    current_directory = os.path.dirname(os.path.abspath(__file__))
+    sequence_json_path = os.path.join(current_directory, f".{user_name}_merged_response.json")
 
     try:
-        with open(f'.{user_name}_merged_response.json', encoding='utf-8') as f:
+        with open(sequence_json_path, encoding='utf-8') as f:
             response_data = json.load(f)
     except Exception as e:
         print(e)
