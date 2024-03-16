@@ -239,13 +239,15 @@ def get_exif(seq_id, sequence_path, lth_images):
         save_path = os.path.join(sequence_path, 'mapilio_image_description.json')
         with open(save_path, 'w') as outfile:
             json.dump(mapilio_description, outfile)
-        json_file = ".download_logs.json"
-        with open(json_file, 'r') as f:
+        current_directory = os.path.dirname(os.path.abspath(__file__))
+        parent_directory = os.path.dirname(current_directory)
+        download_logs_json_path = os.path.join(parent_directory, ".download_logs.json")
+        with open(download_logs_json_path, 'r') as f:
             data = json.load(f)
         for item in data:
             if item.get('seq_id') == seq_id:
                 item['json_success'] = True
-        with open(json_file, 'w') as f:
+        with open(download_logs_json_path, 'w') as f:
             json.dump(data, f)
 
     except requests.exceptions.RequestException as e:

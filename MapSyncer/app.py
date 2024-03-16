@@ -2,7 +2,6 @@ import json
 import os
 import argparse
 
-from dotenv import load_dotenv
 from flask import Flask, render_template, request, jsonify
 
 from MapSyncer.components.download import download_user_images, check_sequence_status, progress
@@ -15,12 +14,13 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--username', type=str, help='Username')
 parser.add_argument('--to_path', type=str, help='Path to download images')
 args = parser.parse_args()
-load_dotenv()
-download_logs_path = os.getenv('DOWNLOAD_LOGS_PATH')
+
+current_directory = os.path.dirname(os.path.abspath(__file__))
+download_logs_json_path = os.path.join(current_directory, ".download_logs.json")
 
 def save_data(data):
     try:
-        with open(download_logs_path, 'w', encoding='utf-8') as f:
+        with open(download_logs_json_path, 'w', encoding='utf-8') as f:
             json.dump(data, f, indent=4)
     except Exception as e:
         print(e)
@@ -29,7 +29,7 @@ def save_data(data):
 
 def load_data():
     try:
-        with open(download_logs_path, encoding='utf-8') as f:
+        with open(download_logs_json_path, encoding='utf-8') as f:
             return json.load(f)
     except Exception as e:
         print(e)

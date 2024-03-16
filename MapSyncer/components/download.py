@@ -181,7 +181,10 @@ def _download_photo_sequence(osc_api: OSCApi,
             current_item_index = download_bar.n
             progress[sequence.online_id] = current_item_index
 
-    log_file = ".download_logs.json"
+    current_directory = os.path.dirname(os.path.abspath(__file__))
+    parent_directory = os.path.dirname(current_directory)
+    download_logs_json_path = os.path.join(parent_directory, ".download_logs.json")
+
     log_data = {
         "seq_id": sequence.online_id,
         "download_success": download_success,
@@ -190,8 +193,8 @@ def _download_photo_sequence(osc_api: OSCApi,
     }
 
     log_data_list = []
-    if os.path.exists(log_file):
-        with open(log_file, 'r') as f:
+    if os.path.exists(download_logs_json_path):
+        with open(download_logs_json_path, 'r') as f:
             log_data_list = json.load(f)
 
     for entry in log_data_list:
@@ -201,7 +204,7 @@ def _download_photo_sequence(osc_api: OSCApi,
     else:
         log_data_list.append(log_data)
 
-    with open(log_file, 'w') as f:
+    with open(download_logs_json_path, 'w') as f:
         json.dump(log_data_list, f, indent=4)
 
     if not download_success:
