@@ -11,6 +11,9 @@ from colorama import (Fore,
 import requests
 from .components.version_ import __version__
 
+current_directory = os.path.dirname(os.path.abspath(__file__))
+download_logs_json_path = os.path.join(current_directory, ".download_logs.json")
+
 def get_latest_version():
     url = "https://raw.githubusercontent.com/mapilio/MapSyncer/main/MapSyncer/components/version_.py"
     response = requests.get(url)
@@ -118,10 +121,9 @@ def folder_selection(path):
 
     if choice == '1':
         print(f"{Fore.LIGHTYELLOW_EX}Uploading all folders...")
-        json_file_path = ".download_logs.json"
         folders_to_upload = []
 
-        with open(json_file_path, 'r') as f:
+        with open(download_logs_json_path, 'r') as f:
             data = json.load(f)
             for folder in data:
                 if not folder.get('json_success'):
@@ -145,7 +147,7 @@ def folder_selection(path):
                     print(f"{Fore.RED}Error occurred while uploading {folder_path}")
                     continue
 
-                update_folder_status(folder_name_numeric, json_file_path)
+                update_folder_status(folder_name_numeric, download_logs_json_path)
         print(f"{Fore.LIGHTGREEN_EX}All folders uploaded. 🎉")
 
     elif choice == '2':
@@ -157,8 +159,7 @@ def folder_selection(path):
         print(f"{Fore.YELLOW}Uploading folder '{folder_name_numeric}'... {Fore.RESET}")
 
         upload_command = f"mapilio_kit upload --processed {path + '/' + folder_name_numeric}"
-        json_file_path = ".download_logs.json"
-        with open(json_file_path, 'r') as f:
+        with open(download_logs_json_path, 'r') as f:
             data = json.load(f)
             for folder in data:
                 if folder.get('seq_id') == folder_name_numeric:
@@ -173,7 +174,7 @@ def folder_selection(path):
         if result != 0:
             print(f"{Fore.RED}Error occurred while uploading {folder_name_numeric}")
         else:
-            update_folder_status(folder_name_numeric, json_file_path)
+            update_folder_status(folder_name_numeric, download_logs_json_path)
 
         folder_selection(path)
 

@@ -92,8 +92,9 @@ def flask_app(folder_path):
     login_controller = LoginController(OSCAPISubDomain.PRODUCTION)
     user = login_controller.login()
     flaskPath = os.path.join('/'.join(os.path.dirname(os.path.abspath(__file__)).split("/")[:-1]), "app.py")
-    command = f"python {flaskPath} --username {user.name} --to_path {folder_path} "
+    command = f"python3 {flaskPath} --username {user.name} --to_path {folder_path} "
     if platform.system() == "Windows":
+        command = f"python {flaskPath} --username {user.name} --to_path {folder_path} "
         subprocess.Popen(['cmd', '/c', 'start', 'cmd', '/k', command])
     elif platform.system() == "Linux":
         subprocess.Popen(['gnome-terminal', '--', 'bash', '-c', f"{command}; read -p 'Press Enter to exit'"])
