@@ -40,9 +40,13 @@ setuptools.setup(
     long_description=get_long_desc(),
     long_description_content_type='text/markdown',
     url="https://github.com/mapilio/MapSyncer",
-    packages=['MapSyncer', 'MapSyncer.templates', 'MapSyncer.components', 'MapSyncer.components.parsers',
-              'MapSyncer.components.parsers.exif', 'MapSyncer.components.parsers.osc_metadata',
-                                                   'MapSyncer.static'],
+    packages=setuptools.find_packages(),
+    package_data={
+        'MapSyncer': [
+            'static/*',
+            'templates/*'
+        ]
+    },
     license='MIT License',
     python_requires='>=3.6',
     install_requires=INSTALL_REQUIRES,
