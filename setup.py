@@ -10,11 +10,13 @@ def get_long_desc():
     with io.open(os.path.join(basedir, "README.md"), encoding="utf-8") as f:
         return f.read()
 
+
 def get_version():
     cwd = os.path.abspath(os.path.dirname(__file__))
     current_version = os.path.join(cwd, "MapSyncer", "components", "version_.py")
     with io.open(current_version, encoding="utf-8") as f:
         return re.search(r'^__version__ = [\'"]([^\'"]*)[\'"]', f.read(), re.M).group(1)
+
 
 # TODO: This part will be removed with an alternative solution.
 INSTALL_REQUIRES = [
@@ -28,7 +30,6 @@ INSTALL_REQUIRES = [
     'psutil',
     'flask',
     'python-dotenv'
-
 ]
 
 setuptools.setup(
@@ -39,7 +40,8 @@ setuptools.setup(
     long_description=get_long_desc(),
     long_description_content_type='text/markdown',
     url="https://github.com/mapilio/MapSyncer",
-    packages=['MapSyncer', 'MapSyncer.templates', 'MapSyncer.components', 'MapSyncer.static'],
+    packages=['MapSyncer', 'MapSyncer.templates', 'MapSyncer.components', 'MapSyncer.components.parsers',
+              'MapSyncer.static'],
     license='MIT License',
     python_requires='>=3.6',
     install_requires=INSTALL_REQUIRES,
