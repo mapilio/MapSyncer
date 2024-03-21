@@ -2,15 +2,14 @@ import os.path
 import random
 import requests
 import json
-import cv2
 import string
 from colorama import Fore, Style, init
 import version_
 from calculation.distance import Distance
+import imagesize
 
 
-
-def check_seq(prev_lon,prev_lat,curr_lon,curr_lat,next_lon,next_lat,threshold=50):
+def check_seq(prev_lon, prev_lat, curr_lon, curr_lat, next_lon, next_lat, threshold=50):
     """
                                                             next_coord
                                                                     *
@@ -31,13 +30,13 @@ def check_seq(prev_lon,prev_lat,curr_lon,curr_lat,next_lon,next_lat,threshold=50
     Returns:
         situation
     """
-    dist1=Distance.haversine(lon1=prev_lon, lat1=prev_lat, lon2=curr_lon, lat2=curr_lat)
-    dist2=Distance.haversine(lon1=curr_lon,lat1=curr_lat,lon2=next_lon,lat2=next_lat)
-    if dist1>threshold and dist2<=threshold:
+    dist1 = Distance.haversine(lon1=prev_lon, lat1=prev_lat, lon2=curr_lon, lat2=curr_lat)
+    dist2 = Distance.haversine(lon1=curr_lon, lat1=curr_lat, lon2=next_lon, lat2=next_lat)
+    if dist1 > threshold and dist2 <= threshold:
         return True
-    elif dist1<threshold:
+    elif dist1 < threshold:
         return False
-    elif dist1>threshold and dist2>threshold:
+    elif dist1 > threshold and dist2 > threshold:
         print(f"{Fore.YELLOW} The current point is far away from other points.{Fore.RESET}")
         return False
 
@@ -57,6 +56,7 @@ def unique_sequence_id_generator(letter_count: int = 8, digit_count: int = 4) ->
     sam_list = list(str1)
     final_string = ''.join(sam_list)
     return final_string
+
 
 def get_api_access_token():
     """
@@ -105,6 +105,7 @@ def get_exif(seq_id, sequence_path, lth_images):
         api_data_details = response_details.json()
 
         while hasMoreData:
+            # There is no need to use acces token.
             url = f"https://api.openstreetcam.org/2.0/photo/?access_token={access_token}&sequenceId={seq_id}&page={page_count}"
             response_photos = requests.get(url)
             api_data_photos = response_photos.json()
@@ -136,16 +137,16 @@ def get_exif(seq_id, sequence_path, lth_images):
                     if idx + 2 < len(api_data_photos['result'][
                                          'data']) and idx > 1:  # cannot use idx + 1 ,idx >0 in this condition. in this situation the last and first items that should not stand alone in sequence.
                         prev_lat = float(api_data_photos['result']['data'][idx - 1]["matchLat"]) if \
-                        api_data_photos['result']['data'][idx - 1].get("matchLat") is not None else float(
+                            api_data_photos['result']['data'][idx - 1].get("matchLat") is not None else float(
                             api_data_photos['result']['data'][idx - 1]["lat"])
                         next_lat = float(api_data_photos['result']['data'][idx + 1]["matchLat"]) if \
-                        api_data_photos['result']['data'][idx + 1].get("matchLat") is not None else float(
+                            api_data_photos['result']['data'][idx + 1].get("matchLat") is not None else float(
                             api_data_photos['result']['data'][idx + 1]["lat"])
                         prev_lon = float(api_data_photos['result']['data'][idx - 1]["matchLng"]) if \
-                        api_data_photos['result']['data'][idx - 1].get("matchLng") is not None else float(
+                            api_data_photos['result']['data'][idx - 1].get("matchLng") is not None else float(
                             api_data_photos['result']['data'][idx - 1]["lng"])
                         next_lon = float(api_data_photos['result']['data'][idx + 1]["matchLng"]) if \
-                        api_data_photos['result']['data'][idx + 1].get("matchLng") is not None else float(
+                            api_data_photos['result']['data'][idx + 1].get("matchLng") is not None else float(
                             api_data_photos['result']['data'][idx + 1]["lng"])
                         situation = check_seq(prev_lon, prev_lat, curr_lon, curr_lat, next_lon, next_lat)
                     else:
@@ -155,9 +156,9 @@ def get_exif(seq_id, sequence_path, lth_images):
 
                     absolute_path = os.path.abspath(f'{sequence_path}/{api_photo_data["name"]}')
                     if absolute_path in lth_images:
-                        img = cv2.imread(absolute_path)
-                        api_photo_data["width"] = str(img.shape[1])
-                        api_photo_data["height"] = str(img.shape[0])
+                        width, height = imagesize.get(absolute_path)
+                        api_photo_data["width"] = str(width)
+                        api_photo_data["height"] = str(height)
 
                     if api_data_details["osv"]["cameraParameters"] is not None:
                         vfov = api_data_details["osv"]["cameraParameters"]["vFoV"]

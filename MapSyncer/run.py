@@ -1,5 +1,6 @@
 # run.py
 import os
+import shutil
 import json
 from mapilio_kit.components.login import list_all_users
 from mapilio_kit.components.edit_config import edit_config
@@ -13,6 +14,13 @@ from .components.version_ import __version__
 
 current_directory = os.path.dirname(os.path.abspath(__file__))
 download_logs_json_path = os.path.join(current_directory, ".download_logs.json")
+
+IMAGES_DOWNLOAD_PATH = os.path.join(
+        os.path.expanduser("~"),
+        ".cache",
+        "mapilio",
+        "images"
+    )
 
 def get_latest_version():
     url = "https://raw.githubusercontent.com/mapilio/MapSyncer/main/MapSyncer/components/version_.py"
@@ -52,18 +60,12 @@ def main():
         print(f"{Fore.LIGHTCYAN_EX}To access the web interface of MapSyncer, simply navigate to the following URL:\n"
               f"http://localhost:5050/ in your web browser's address bar.\n{Fore.RESET}")
 
-        folder_path = input(f"{Fore.LIGHTYELLOW_EX}Please enter the path to the folder to download images to:\n{Fore.RESET}")
-        folder_path = folder_path.strip('\'"')
+        if not os.path.exists(IMAGES_DOWNLOAD_PATH):
+            os.makedirs(IMAGES_DOWNLOAD_PATH)
+        flask_app(IMAGES_DOWNLOAD_PATH)
+        download_user_images(IMAGES_DOWNLOAD_PATH)
 
-        if 'mapilio_images' not in folder_path:
-            folder_path = os.path.join(folder_path, 'mapilio_images')
-            if not os.path.exists(folder_path):
-                os.makedirs(folder_path)
-
-        flask_app(folder_path)
-        download_user_images(folder_path)
-
-        folder_selection(folder_path)
+        folder_selection(IMAGES_DOWNLOAD_PATH)
 
 
 def get_args_mapilio(func):
@@ -101,12 +103,16 @@ def check_auth():
     else:
         print("Please enter your username, email and password properly \n\n\n\n\n")
         check_auth()
-
 def update_folder_status(folder_name_numeric, json_file):
     with open(json_file, 'r') as f:
         data = json.load(f)
         for folder in data:
             if folder.get('seq_id') == folder_name_numeric:
+                uploaded_path = os.path.join(IMAGES_DOWNLOAD_PATH, folder.get('seq_id'))
+                try:
+                    shutil.rmtree(uploaded_path)
+                except OSError as err:
+                    print(f"Error: {uploaded_path} could not be deleted. - {err}")
                 folder['upload_success'] = True
                 break
     with open(json_file, 'w') as f:
