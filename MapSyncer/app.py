@@ -1,5 +1,6 @@
 import json
 import os
+import shutil
 import argparse
 
 from flask import Flask, render_template, request, jsonify
@@ -17,6 +18,7 @@ args = parser.parse_args()
 
 current_directory = os.path.dirname(os.path.abspath(__file__))
 download_logs_json_path = os.path.join(current_directory, ".download_logs.json")
+
 
 def save_data(data):
     try:
@@ -142,8 +144,7 @@ def update_json():
         if item['seq_id'] == seq_id:
             item[key] = new_value == 'true'
             save_data(data)
-            return jsonify({"message": "JSON updated successfully"})
-
+            return jsonify({"success": True, "message": "JSON updated successfully"})
     return jsonify({"message": "Sequence ID not found"}), 404
 
 
@@ -184,7 +185,12 @@ def upload_sequence():
                 else:
                     log_entry["upload_success"] = True
                     save_data(download_logs)
-                    return jsonify({"status": "success"})
+                    uploaded_path = os.path.join(to_path, sequence_id)
+                    try:
+                        shutil.rmtree(uploaded_path)
+                    except OSError as err:
+                        print(f"Error: {uploaded_path} could not be deleted. - {err}")
+                    return jsonify({"status": "success", "message": "Sequence uploaded successfully"})
     return jsonify({"status": "error", "message": "Sequence not found in log file or sequence folder not found."}), 404
 
 @app.route('/download-progress-bar', methods=['POST'])

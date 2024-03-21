@@ -24,7 +24,6 @@ INSTALL_REQUIRES = [
     'ExifRead',
     'calculation-mapilio==0.1.39',
     'requests_oauthlib',
-    'opencv-python',
     'imagesize',
     'setuptools',
     'psutil',
