@@ -19,12 +19,6 @@ args = parser.parse_args()
 current_directory = os.path.dirname(os.path.abspath(__file__))
 download_logs_json_path = os.path.join(current_directory, ".download_logs.json")
 
-IMAGES_DOWNLOAD_PATH = os.path.join(
-        os.path.expanduser("~"),
-        ".cache",
-        "mapilio",
-        "images"
-    )
 
 def save_data(data):
     try:
