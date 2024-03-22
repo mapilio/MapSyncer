@@ -92,14 +92,30 @@ def flask_app(folder_path):
     login_controller = LoginController(OSCAPISubDomain.PRODUCTION)
     user = login_controller.login()
     flaskPath = os.path.join('/'.join(os.path.dirname(os.path.abspath(__file__)).split("/")[:-1]), "app.py")
-    command = f"python3 {flaskPath} --username {user.name} --to_path {folder_path} "
+    command = f"python3 {flaskPath} --username {user.name} --to_path {folder_path}"
     if platform.system() == "Windows":
         command = f"python {flaskPath} --username {user.name} --to_path {folder_path} "
         subprocess.Popen(['cmd', '/c', 'start', 'cmd', '/k', command])
     elif platform.system() == "Linux":
         subprocess.Popen(['gnome-terminal', '--', 'bash', '-c', f"{command}; read -p 'Press Enter to exit'"])
     elif platform.system() == "Darwin":  # macOS
-        subprocess.Popen(['open', '-a', 'Terminal', 'app.py'])
+        def get_virtualenv_path():
+            try:
+                venv_path = subprocess.check_output(['which', 'python']).decode().strip()
+                if 'usr' not in venv_path:
+                    return venv_path.split('bin')[0]
+            except subprocess.CalledProcessError:
+                pass
+                return None
+
+        venv_path = get_virtualenv_path()
+        if venv_path:
+            venv_activate_command = f'source {venv_path}/bin/activate && '
+        else:
+            venv_activate_command = ''
+
+        applescript = f'tell application "Terminal" to do script "{venv_activate_command}python3 {flaskPath} --username {user.name} --to_path {folder_path}"'
+        subprocess.run(['osascript', '-e', applescript])
     else:
         print("Unsupported operating system")
 

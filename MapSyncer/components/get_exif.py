@@ -62,18 +62,24 @@ def get_api_access_token():
     """
     This function retrieves the OpenStreetCam API access token from the credentials.json file.
     """
-    credentials_file_path = 'credentials.json'
+    CREDENTIALS_FILE = os.path.join(
+        os.path.expanduser("~"),
+        ".config",
+        "mapilio",
+        "configs",
+        "credentials.json"
+    )
 
     try:
-        with open(credentials_file_path, 'r') as credentials_file:
+        with open(CREDENTIALS_FILE, 'r') as credentials_file:
             credentials = json.load(credentials_file)
             osm_token = credentials.get("osm", {}).get("token")
             return osm_token
     except FileNotFoundError:
-        print(f"Error: {credentials_file_path} not found.")
+        print(f"Error: {CREDENTIALS_FILE} not found.")
         return None
     except json.JSONDecodeError as e:
-        print(f"Error decoding JSON in {credentials_file_path}: {e}")
+        print(f"Error decoding JSON in {CREDENTIALS_FILE}: {e}")
         return None
 
 

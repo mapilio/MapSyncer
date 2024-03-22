@@ -138,6 +138,12 @@ def folder_selection(path):
                 elif not folder.get('upload_success'):
                     folders_to_upload.append(folder.get('seq_id'))
 
+        files = os.listdir(path)
+        for file in files:
+            file_path = os.path.join(path, file)
+            if os.path.isfile(file_path):
+                os.remove(file_path)
+
         for folder_name in os.listdir(path):
             folder_path = os.path.join(path, folder_name)
             if len(os.listdir(folder_path)) < 5:
@@ -153,7 +159,7 @@ def folder_selection(path):
                     print(f"{Fore.RED}Error occurred while uploading {folder_path}")
                     continue
 
-                update_folder_status(folder_name_numeric, download_logs_json_path)
+            update_folder_status(folder_name_numeric, download_logs_json_path)
         print(f"{Fore.LIGHTGREEN_EX}All folders uploaded. 🎉")
 
     elif choice == '2':
