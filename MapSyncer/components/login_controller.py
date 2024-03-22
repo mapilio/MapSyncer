@@ -10,7 +10,14 @@ from osc_api_gateway import OSCUser
 from osc_api_gateway import OSCAPISubDomain
 
 # constants
-CREDENTIALS_FILE = "credentials.json"
+
+CREDENTIALS_FILE = os.path.join(
+        os.path.expanduser("~"),
+        ".config",
+        "mapilio",
+        "configs",
+        "credentials.json"
+    )
 OSM_KEY = "osm"
 OSC_KEY = "osc"
 
