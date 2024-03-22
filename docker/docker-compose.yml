@@ -1,0 +1,10 @@
+version: '3'
+services:
+  kit:
+    image: mapsyncer
+    container_name: mapsyncer
+    build: .
+    stdin_open: true
+    tty: true
+    ports:
+      - "5050:5050"
