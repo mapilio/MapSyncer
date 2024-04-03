@@ -337,14 +337,19 @@ class OSCApi:
         return None
 
     def user_sequences(self, user_name: str, to_path: str) -> Tuple[List[OSCSequence], Exception]:
-        current_directory = os.path.dirname(os.path.abspath(__file__))
-        parent_directory = os.path.dirname(current_directory)
-        sequence_json_path = os.path.join(parent_directory, f".{user_name}_merged_response.json")
-        if not os.path.exists(sequence_json_path):
+        MERGED_RESPONSE = os.path.join(
+            os.path.expanduser("~"),
+            ".config",
+            "mapilio",
+            "configs",
+            "MapSyncer",
+            f"{user_name}_sequences_logs.json"
+        )
+        if not os.path.exists(MERGED_RESPONSE):
             sequences, error = self._user_sequences(user_name, to_path)
         else:
             sequences = []
-            with open(sequence_json_path, 'r') as f:
+            with open(MERGED_RESPONSE, 'r') as f:
                 responses = json.load(f)
             for r in responses:
                 response = responses[r]
@@ -355,6 +360,23 @@ class OSCApi:
                         sequences.append(sequence)
             error = None
         return sequences, error
+
+    def get_missing_sequences(self, user_name: str, to_path: str) -> Tuple[List[OSCSequence], Exception]:
+        MERGED_RESPONSE = os.path.join(
+            os.path.expanduser("~"),
+            ".config",
+            "mapilio",
+            "configs",
+            "MapSyncer",
+            f"{user_name}_sequences_logs.json"
+        )
+        if os.path.exists(MERGED_RESPONSE):
+            sequences, error = self._user_sequences(user_name, to_path)
+        else:
+            print("Json response not found")
+
+        return sequences, error
+
 
     def _user_sequences(self, user_name: str, to_path: str) -> Tuple[List[OSCSequence], Exception]:
         """get all tracks for a user id """
@@ -380,8 +402,6 @@ class OSCApi:
         print(
             f"{Fore.BLUE}Total count of images: {Fore.LIGHTBLUE_EX}{total_items}{Fore.RESET}{Fore.BLUE} Total count of pages: {Fore.LIGHTBLUE_EX}{pages_count}")
 
-        self.calculate_disk_space(total_items, to_path)
-
         sequences = []
         if 'currentPageItems' in json_response:
             for item in json_response['currentPageItems']:
@@ -397,12 +417,19 @@ class OSCApi:
                 for page in range(2, 30)
             ]
 
-            current_directory = os.path.dirname(os.path.abspath(__file__))
-            parent_directory = os.path.dirname(current_directory)
-            sequence_json_path = os.path.join(parent_directory, f".{user_name}_merged_response.json")
 
-            with open(sequence_json_path, "w") as file:
+            MERGED_RESPONSE = os.path.join(
+                os.path.expanduser("~"),
+                ".config",
+                "mapilio",
+                "configs",
+                "MapSyncer",
+                f"{user_name}_sequences_logs.json"
+            )
+
+            with open(MERGED_RESPONSE, "w") as file:
                 json.dump(merged_json_response, file)
+            
 
             if not futures:
                 loop.close()
@@ -419,7 +446,7 @@ class OSCApi:
                 merged_json_response.update({str(idx + 1): sequence_page_return[1]})
 
                 sequences = sequences + sequence_page_return[0]
-            with open(sequence_json_path, "w") as file:
+            with open(MERGED_RESPONSE, "w") as file:
                 json.dump(merged_json_response, file)
             return sequences, None
 
