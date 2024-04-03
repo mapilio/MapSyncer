@@ -1,3 +1,26 @@
+function storeData(sequenceId, uploadInProgress, downloadInProgress, downloadFinished, uploadFinished) {
+    var existingEntries = JSON.parse(localStorage.getItem("allEntries")) || [];
+    var foundEntryIndex = existingEntries.findIndex(entry => entry.seqId === String(sequenceId));
+
+    if (foundEntryIndex === -1) {
+        var entry = {
+            "seqId": sequenceId,
+            "uploadInProgress": uploadInProgress,
+            "downloadInProgress": downloadInProgress,
+            "downloadFinished": downloadFinished,
+            "uploadFinished": uploadFinished,
+        };
+        existingEntries.push(entry);
+    } else {
+        existingEntries[foundEntryIndex].uploadInProgress = uploadInProgress;
+        existingEntries[foundEntryIndex].downloadInProgress = downloadInProgress;
+        existingEntries[foundEntryIndex].downloadFinished = downloadFinished;
+        existingEntries[foundEntryIndex].uploadFinished = uploadFinished;
+    }
+
+    localStorage.setItem("allEntries", JSON.stringify(existingEntries));
+}
+
 function updateJson(event) {
     event.preventDefault();
     var formData = new FormData(event.target);

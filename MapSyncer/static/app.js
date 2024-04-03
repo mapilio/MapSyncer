@@ -94,7 +94,7 @@ function downloadSeq(sequenceId, to_path = 0) {
         })
     }).then(response => {
         if (response.ok) {
-            handleButtonState(button, [buttonSuccessClass, buttonDisabledClass], [buttonWarningClass], 'Downloaded')
+            handleButtonState(button, [buttonSuccessClass, buttonDisabledClass], [buttonWarningClass, buttonDangerClass], 'Downloaded')
             alert('Sequence ' + sequenceId + ' downloaded successfully!');
             setTimeout(function () {
                 document.getElementById('disableUpload_' + sequenceId).classList.remove('disabled');
@@ -181,7 +181,7 @@ function uploadSequence(sequenceId, button, to_path) {
         return response.json();
     }).then(data => {
         if (data.status === 'success') {
-            handleButtonState(button, [buttonSuccessClass, buttonDisabledClass], [buttonWarningClass], 'Uploaded')
+            handleButtonState(button, [buttonSuccessClass, buttonDisabledClass], [buttonDangerClass, buttonWarningClass], 'Uploaded')
             uploadFinished = true
             storeData(sequenceId, false, false, true, true);
             alert('Sequence ' + sequenceId + ' uploaded successfully!');
