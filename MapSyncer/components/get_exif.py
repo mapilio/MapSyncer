@@ -67,6 +67,7 @@ def get_api_access_token():
         ".config",
         "mapilio",
         "configs",
+        "MapSyncer",
         "credentials.json"
     )
 
@@ -91,6 +92,15 @@ def get_exif(seq_id, sequence_path, lth_images):
         seq_id (str): The sequence ID.
         sequence_path (str): The path to the sequence folder.
     """
+    DOWNLOAD_LOGS = os.path.join(
+        os.path.expanduser("~"),
+        ".config",
+        "mapilio",
+        "configs",
+        "MapSyncer",
+        "download_logs.json"
+    )
+
     access_token = get_api_access_token()
 
     if access_token is None:
@@ -246,15 +256,13 @@ def get_exif(seq_id, sequence_path, lth_images):
         save_path = os.path.join(sequence_path, 'mapilio_image_description.json')
         with open(save_path, 'w') as outfile:
             json.dump(mapilio_description, outfile)
-        current_directory = os.path.dirname(os.path.abspath(__file__))
-        parent_directory = os.path.dirname(current_directory)
-        download_logs_json_path = os.path.join(parent_directory, ".download_logs.json")
-        with open(download_logs_json_path, 'r') as f:
+
+        with open(DOWNLOAD_LOGS, 'r') as f:
             data = json.load(f)
         for item in data:
             if item.get('seq_id') == seq_id:
                 item['json_success'] = True
-        with open(download_logs_json_path, 'w') as f:
+        with open(DOWNLOAD_LOGS, 'w') as f:
             json.dump(data, f)
 
     except requests.exceptions.RequestException as e:

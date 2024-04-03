@@ -16,6 +16,7 @@ CREDENTIALS_FILE = os.path.join(
         ".config",
         "mapilio",
         "configs",
+        "MapSyncer",
         "credentials.json"
     )
 OSM_KEY = "osm"
