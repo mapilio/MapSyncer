@@ -506,7 +506,8 @@ class OSCApi:
             with requests.get(resource_url) as response:
                 response.raise_for_status()
                 storage.put(response.content, file_path + "partial")
-                storage.rename(file_path + "partial", file_path)
+                if os.path.exists(file_path + "partial"):
+                    storage.rename(file_path + "partial", file_path)
             return True, None, None
         except requests.exceptions.RequestException as ex:
             if isinstance(ex, requests.exceptions.HTTPError) and ex.response.status_code == 404:
