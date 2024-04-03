@@ -97,6 +97,7 @@ def parse_selection(selection, sequences):
     return selected_sequences
 
 def flask_app(folder_path):
+    #TODO: Flask will be up by app.app, shouldnt use subprocesser
     login_controller = LoginController(OSCAPISubDomain.PRODUCTION)
     user = login_controller.login()
     flaskPath = os.path.join('/'.join(os.path.dirname(os.path.abspath(__file__)).split("/")[:-1]), "app.py")
