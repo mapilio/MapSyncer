@@ -12,13 +12,20 @@ from colorama import (Fore,
 import requests
 from .components.version_ import __version__
 
-current_directory = os.path.dirname(os.path.abspath(__file__))
-download_logs_json_path = os.path.join(current_directory, ".download_logs.json")
+DOWNLOAD_LOGS = os.path.join(
+        os.path.expanduser("~"),
+        ".config",
+        "mapilio",
+        "configs",
+        "MapSyncer",
+        "download_logs.json"
+    )
 
 IMAGES_DOWNLOAD_PATH = os.path.join(
         os.path.expanduser("~"),
         ".cache",
         "mapilio",
+        "MapSyncer",
         "images"
     )
 
@@ -46,26 +53,13 @@ def main():
 
     init_colorama()
 
-    check_authenticate = False
+    print(f"{Fore.LIGHTCYAN_EX}To access the web interface of MapSyncer, simply navigate to the following URL:\n"
+          f"http://localhost:5050/ in your web browser's address bar.\n{Fore.RESET}")
 
-    if len(list_all_users()) == 0:
-        check_authenticate = check_auth()
-    elif len(list_all_users()) >= 2:
-        username = input("Found multiple Mapilio accounts. Please specify your username.\n")
-    else:
-        check_authenticate = True
+    if not os.path.exists(IMAGES_DOWNLOAD_PATH):
+        os.makedirs(IMAGES_DOWNLOAD_PATH)
 
-    if check_authenticate:
-
-        print(f"{Fore.LIGHTCYAN_EX}To access the web interface of MapSyncer, simply navigate to the following URL:\n"
-              f"http://localhost:5050/ in your web browser's address bar.\n{Fore.RESET}")
-
-        if not os.path.exists(IMAGES_DOWNLOAD_PATH):
-            os.makedirs(IMAGES_DOWNLOAD_PATH)
-        flask_app(IMAGES_DOWNLOAD_PATH)
-        download_user_images(IMAGES_DOWNLOAD_PATH)
-
-        folder_selection(IMAGES_DOWNLOAD_PATH)
+    flask_app(IMAGES_DOWNLOAD_PATH)
 
 
 def get_args_mapilio(func):
@@ -99,7 +93,6 @@ def check_auth():
             return check_authenticate
         else:
             check_auth()
-
     else:
         print("Please enter your username, email and password properly \n\n\n\n\n")
         check_auth()
@@ -129,7 +122,7 @@ def folder_selection(path):
         print(f"{Fore.LIGHTYELLOW_EX}Uploading all folders...")
         folders_to_upload = []
 
-        with open(download_logs_json_path, 'r') as f:
+        with open(DOWNLOAD_LOGS, 'r') as f:
             data = json.load(f)
             for folder in data:
                 if not folder.get('json_success'):
@@ -159,7 +152,7 @@ def folder_selection(path):
                     print(f"{Fore.RED}Error occurred while uploading {folder_path}")
                     continue
 
-            update_folder_status(folder_name_numeric, download_logs_json_path)
+            update_folder_status(folder_name_numeric, DOWNLOAD_LOGS)
         print(f"{Fore.LIGHTGREEN_EX}All folders uploaded. 🎉")
 
     elif choice == '2':
@@ -171,7 +164,7 @@ def folder_selection(path):
         print(f"{Fore.YELLOW}Uploading folder '{folder_name_numeric}'... {Fore.RESET}")
 
         upload_command = f"mapilio_kit upload --processed {path + '/' + folder_name_numeric}"
-        with open(download_logs_json_path, 'r') as f:
+        with open(DOWNLOAD_LOGS, 'r') as f:
             data = json.load(f)
             for folder in data:
                 if folder.get('seq_id') == folder_name_numeric:
@@ -186,7 +179,7 @@ def folder_selection(path):
         if result != 0:
             print(f"{Fore.RED}Error occurred while uploading {folder_name_numeric}")
         else:
-            update_folder_status(folder_name_numeric, download_logs_json_path)
+            update_folder_status(folder_name_numeric, DOWNLOAD_LOGS)
 
         folder_selection(path)
 

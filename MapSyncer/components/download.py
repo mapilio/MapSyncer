@@ -28,12 +28,20 @@ progress = {}
 
 LOGGER = logging.getLogger('osc_tools.osc_utils')
 
+DOWNLOAD_LOGS = os.path.join(
+        os.path.expanduser("~"),
+        ".config",
+        "mapilio",
+        "configs",
+        "MapSyncer",
+        "download_logs.json"
+    )
+
 def check_sequence_status(sequence_id):
-    log_file = ".download_logs.json"
-    if os.path.exists(log_file):
-        if os.path.getsize(log_file) == 0:
+    if os.path.exists(DOWNLOAD_LOGS):
+        if os.path.getsize(DOWNLOAD_LOGS) == 0:
             return False
-        with open(log_file, 'r') as f:
+        with open(DOWNLOAD_LOGS, 'r') as f:
             log_data_list = json.load(f)
             for entry in log_data_list:
                 if entry.get("seq_id") == sequence_id and entry.get("download_success") and entry.get("upload_success"):
@@ -97,7 +105,10 @@ def flask_app(folder_path):
         command = f"python {flaskPath} --username {user.name} --to_path {folder_path} "
         subprocess.Popen(['cmd', '/c', 'start', 'cmd', '/k', command])
     elif platform.system() == "Linux":
-        subprocess.Popen(['gnome-terminal', '--', 'bash', '-c', f"{command}; read -p 'Press Enter to exit'"])
+        try:
+            subprocess.Popen(['gnome-terminal', '--', 'bash', '-c', f"{command}; read -p 'Press Enter to exit'"])
+        except:
+            subprocess.Popen(['bash', '-c', f"{command}; read -p 'Press Enter to exit'"])
     elif platform.system() == "Darwin":  # macOS
         def get_virtualenv_path():
             try:
@@ -198,9 +209,6 @@ def _download_photo_sequence(osc_api: OSCApi,
             current_item_index = download_bar.n
             progress[sequence.online_id] = current_item_index
 
-    current_directory = os.path.dirname(os.path.abspath(__file__))
-    parent_directory = os.path.dirname(current_directory)
-    download_logs_json_path = os.path.join(parent_directory, ".download_logs.json")
 
     log_data = {
         "seq_id": sequence.online_id,
@@ -210,8 +218,8 @@ def _download_photo_sequence(osc_api: OSCApi,
     }
 
     log_data_list = []
-    if os.path.exists(download_logs_json_path):
-        with open(download_logs_json_path, 'r') as f:
+    if os.path.exists(DOWNLOAD_LOGS):
+        with open(DOWNLOAD_LOGS, 'r') as f:
             log_data_list = json.load(f)
 
     for entry in log_data_list:
@@ -221,7 +229,7 @@ def _download_photo_sequence(osc_api: OSCApi,
     else:
         log_data_list.append(log_data)
 
-    with open(download_logs_json_path, 'w') as f:
+    with open(DOWNLOAD_LOGS, 'w') as f:
         json.dump(log_data_list, f, indent=4)
 
     if not download_success:
@@ -244,7 +252,10 @@ def _download_photo(photo: OSCPhoto,
         LOGGER.debug("Failed to download image: %s", photo.photo_url())
 
     if add_gps_to_exif and photo_success:
-        parser = ExifParser(photo_download_name, local_storage)
+        try:
+            parser = ExifParser(photo_download_name, local_storage)
+        except FileNotFoundError:
+            print("File not found: " + photo_download_name)
         if len(parser.items_with_class(GPS)) == 0:
             item = GPS()
             item.latitude = photo.latitude
