@@ -13,7 +13,9 @@ from osm_login_python.core import Auth
 from MapSyncer.components.download import download_user_images, check_sequence_status, progress
 from MapSyncer.components.osc_api_gateway import OSCAPISubDomain
 from MapSyncer.components.osc_api_gateway import OSCApi
+from MapSyncer.components.ssl import ssl_create
 
+ssl_create()
 app = Flask(__name__)
 app.secret_key = "nnp6kt5DEheyZha8ez2WUSzJ"
 
