@@ -275,7 +275,7 @@ def download_sequence(sequence_id=None):
         sequence_id = request.form.get('sequence_id')
 
     if IMAGES_PATH:
-        download_user_images(IMAGES_PATH, sequence_id, user_name)
+        download_user_images(IMAGES_PATH, user_name, sequence_id)
         return jsonify({"status": "success", "message": "Sequence downloaded successfully"}), 200
     return jsonify({"status": "error", "message": "missing path parameter"}), 400
 
