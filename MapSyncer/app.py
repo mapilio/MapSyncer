@@ -15,7 +15,7 @@ from MapSyncer.components.osc_api_gateway import OSCAPISubDomain
 from MapSyncer.components.osc_api_gateway import OSCApi
 
 app = Flask(__name__)
-app.secret_key = "mapSyncer123"
+app.secret_key = "nnp6kt5DEheyZha8ez2WUSzJ"
 
 DOWNLOAD_LOGS = os.path.join(os.path.expanduser("~"), ".config", "mapilio", "configs", "MapSyncer",
                              "download_logs.json")
@@ -57,7 +57,7 @@ osm_auth = Auth(
     osm_url="https://www.openstreetmap.org",
     client_id="_W2iScgbQwmvYggNsSjhXMFuWzMRLBssxLMZMrxMktU",
     client_secret="rx-qjH487o480w-h-8c0nSvUlXf_Jwx-KnywDlrh3KY",
-    secret_key="mapSyncer123",
+    secret_key="nnp6kt5DEheyZha8ez2WUSzJ",
     login_redirect_uri="https://127.0.0.1:5050/authenticate/",
     scope="read_prefs"
 )
@@ -275,7 +275,7 @@ def download_sequence(sequence_id=None):
         sequence_id = request.form.get('sequence_id')
 
     if IMAGES_PATH:
-        download_user_images(IMAGES_PATH, sequence_id, user_name)
+        download_user_images(IMAGES_PATH, user_name, sequence_id)
         return jsonify({"status": "success", "message": "Sequence downloaded successfully"}), 200
     return jsonify({"status": "error", "message": "missing path parameter"}), 400
 
