@@ -161,15 +161,11 @@
     </div>
     <script>
         var user_name = "{{ user_name }}";
-        localStorage.setItem('user_name', user_name);
-        var stored_user_name = localStorage.getItem('user_name');
-
-        const clickHereElement = document.getElementById("clickHere");
-    
-        clickHereElement.addEventListener("click", function(event) {
-          event.preventDefault();
-          getMissingSequences();
-        });
+        if (user_name === "None" || user_name === null || user_name === "") {
+            window.location.href = "/";
+        } else {
+            localStorage.setItem('user_name', user_name);
+        }
       </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="{{ url_for('static', filename='app.js') }}"></script>

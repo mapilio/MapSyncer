@@ -238,12 +238,15 @@ function getUserInfo() {
     infomessage.textContent = 'Sequences are being fetched...';
     infomessage.style.display = 'block';
     document.getElementById("fetchButton").disabled = true;
-
+    username = window.localStorage.getItem("user_name");
     fetch('/get-user-sequences', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
-        }
+        },
+        body: new URLSearchParams({
+            'user_name': username
+        })
     })
     .then(response => {
         if (!response.ok) {
@@ -277,12 +280,16 @@ function getMissingSequences() {
     infoMessageMissing.classList.remove('alert-warning', 'alert-success');
     infoMessageMissing.style.display = 'block';
     infoMessageMissing.disabled = true;
+    username = window.localStorage.getItem("user_name");
 
     fetch('/get-missing-sequences', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
-        }
+        },
+        body: new URLSearchParams({
+            'user_name': username
+        })
     })
         .then(response => {
             if (!response.ok) {
@@ -361,6 +368,13 @@ document.addEventListener("DOMContentLoaded", function () {
     const allProgressBars = document.querySelectorAll('.progress-bar');
     allProgressBars.forEach(function (progressBar) {
         progressBar.parentElement.style.visibility = 'hidden';
+    });
+
+    const clickHereElement = document.getElementById("clickHere");
+
+    clickHereElement.addEventListener("click", function(event) {
+      event.preventDefault();
+      getMissingSequences();
     });
 });
 
