@@ -58,30 +58,30 @@ def unique_sequence_id_generator(letter_count: int = 8, digit_count: int = 4) ->
     return final_string
 
 
-def get_api_access_token():
-    """
-    This function retrieves the OpenStreetCam API access token from the credentials.json file.
-    """
-    CREDENTIALS_FILE = os.path.join(
-        os.path.expanduser("~"),
-        ".config",
-        "mapilio",
-        "configs",
-        "MapSyncer",
-        "credentials.json"
-    )
-
-    try:
-        with open(CREDENTIALS_FILE, 'r') as credentials_file:
-            credentials = json.load(credentials_file)
-            osm_token = credentials.get("osm", {}).get("token")
-            return osm_token
-    except FileNotFoundError:
-        print(f"Error: {CREDENTIALS_FILE} not found.")
-        return None
-    except json.JSONDecodeError as e:
-        print(f"Error decoding JSON in {CREDENTIALS_FILE}: {e}")
-        return None
+# def get_api_access_token():
+#     """
+#     This function retrieves the OpenStreetCam API access token from the credentials.json file.
+#     """
+#     CREDENTIALS_FILE = os.path.join(
+#         os.path.expanduser("~"),
+#         ".config",
+#         "mapilio",
+#         "configs",
+#         "MapSyncer",
+#         "credentials.json"
+#     )
+#
+#     try:
+#         with open(CREDENTIALS_FILE, 'r') as credentials_file:
+#             credentials = json.load(credentials_file)
+#             osm_token = credentials.get("osm", {}).get("token")
+#             return osm_token
+#     except FileNotFoundError:
+#         print(f"Error: {CREDENTIALS_FILE} not found.")
+#         return None
+#     except json.JSONDecodeError as e:
+#         print(f"Error decoding JSON in {CREDENTIALS_FILE}: {e}")
+#         return None
 
 
 def get_exif(seq_id, sequence_path, lth_images):
@@ -101,11 +101,11 @@ def get_exif(seq_id, sequence_path, lth_images):
         "download_logs.json"
     )
 
-    access_token = get_api_access_token()
+    # access_token = get_api_access_token()
 
-    if access_token is None:
-        print("Access token not found. Please check your credentials.")
-        return sequence_path
+    # if access_token is None:
+    #     print("Access token not found. Please check your credentials.")
+    #     return sequence_path
 
     url_details = f"https://api.openstreetcam.org/details"
     params = {
@@ -122,7 +122,8 @@ def get_exif(seq_id, sequence_path, lth_images):
 
         while hasMoreData:
             # There is no need to use acces token.
-            url = f"https://api.openstreetcam.org/2.0/photo/?access_token={access_token}&sequenceId={seq_id}&page={page_count}"
+            # url = f"https://api.openstreetcam.org/2.0/photo/?access_token={access_token}&sequenceId={seq_id}&page={page_count}"
+            url = f"https://api.openstreetcam.org/2.0/photo/?&sequenceId={seq_id}&page={page_count}"
             response_photos = requests.get(url)
             api_data_photos = response_photos.json()
 

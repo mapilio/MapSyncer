@@ -328,7 +328,7 @@ class OSCApi:
         return sequences, error
 
 
-    def _user_sequences(self, user_name: str, to_path: str) -> Tuple[List[OSCSequence], Exception]:
+    def _user_sequences(self, user_name: str) -> Tuple[List[OSCSequence], Exception]:
         """get all tracks for a user id """
         merged_json_response = {}
         print(
