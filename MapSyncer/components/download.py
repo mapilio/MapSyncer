@@ -17,7 +17,6 @@ from tqdm.auto import tqdm
 
 from common_models import GPS
 from storage import Local
-from login_controller import LoginController
 from osc_api_config import OSCAPISubDomain
 from osc_api_gateway import OSCApi
 from osc_api_models import OSCPhoto
@@ -96,49 +95,50 @@ def parse_selection(selection, sequences):
             return None
     return selected_sequences
 
-def flask_app(folder_path):
-    #TODO: Flask will be up by app.app, shouldnt use subprocesser
-    login_controller = LoginController(OSCAPISubDomain.PRODUCTION)
-    user = login_controller.login()
-    flaskPath = os.path.join('/'.join(os.path.dirname(os.path.abspath(__file__)).split("/")[:-1]), "app.py")
-    command = f"python3 {flaskPath} --username {user.name} --to_path {folder_path}"
-    if platform.system() == "Windows":
-        command = f"python {flaskPath} --username {user.name} --to_path {folder_path} "
-        subprocess.Popen(['cmd', '/c', 'start', 'cmd', '/k', command])
-    elif platform.system() == "Linux":
-        try:
-            subprocess.Popen(['gnome-terminal', '--', 'bash', '-c', f"{command}; read -p 'Press Enter to exit'"])
-        except:
-            subprocess.Popen(['bash', '-c', f"{command}; read -p 'Press Enter to exit'"])
-    elif platform.system() == "Darwin":  # macOS
-        def get_virtualenv_path():
-            try:
-                venv_path = subprocess.check_output(['which', 'python']).decode().strip()
-                if 'usr' not in venv_path:
-                    return venv_path.split('bin')[0]
-            except subprocess.CalledProcessError:
-                pass
-                return None
+# def flask_app(folder_path):
+#     #TODO: Flask will be up by app.app, shouldnt use subprocesser
+#     login_controller = LoginController(OSCAPISubDomain.PRODUCTION)
+#     user = login_controller.login()
+#     flaskPath = os.path.join('/'.join(os.path.dirname(os.path.abspath(__file__)).split("/")[:-1]), "app.py")
+#     command = f"python3 {flaskPath} --username {user.name} --to_path {folder_path}"
+#     if platform.system() == "Windows":
+#         command = f"python {flaskPath} --username {user.name} --to_path {folder_path} "
+#         subprocess.Popen(['cmd', '/c', 'start', 'cmd', '/k', command])
+#     elif platform.system() == "Linux":
+#         try:
+#             subprocess.Popen(['gnome-terminal', '--', 'bash', '-c', f"{command}; read -p 'Press Enter to exit'"])
+#         except:
+#             subprocess.Popen(['bash', '-c', f"{command}; read -p 'Press Enter to exit'"])
+#     elif platform.system() == "Darwin":  # macOS
+#         def get_virtualenv_path():
+#             try:
+#                 venv_path = subprocess.check_output(['which', 'python']).decode().strip()
+#                 if 'usr' not in venv_path:
+#                     return venv_path.split('bin')[0]
+#             except subprocess.CalledProcessError:
+#                 pass
+#                 return None
+#
+#         venv_path = get_virtualenv_path()
+#         if venv_path:
+#             venv_activate_command = f'source {venv_path}/bin/activate && '
+#         else:
+#             venv_activate_command = ''
+#
+#         applescript = f'tell application "Terminal" to do script "{venv_activate_command}python3 {flaskPath} --username {user.name} --to_path {folder_path}"'
+#         subprocess.run(['osascript', '-e', applescript])
+#     else:
+#         print("Unsupported operating system")
 
-        venv_path = get_virtualenv_path()
-        if venv_path:
-            venv_activate_command = f'source {venv_path}/bin/activate && '
-        else:
-            venv_activate_command = ''
 
-        applescript = f'tell application "Terminal" to do script "{venv_activate_command}python3 {flaskPath} --username {user.name} --to_path {folder_path}"'
-        subprocess.run(['osascript', '-e', applescript])
-    else:
-        print("Unsupported operating system")
-
-
-def download_user_images(to_path, selected_sequences_id=None):
-    login_controller = LoginController(OSCAPISubDomain.PRODUCTION)
+def download_user_images(to_path,user_name,selected_sequences_id=None):
+    # login_controller = LoginController(OSCAPISubDomain.PRODUCTION)
     # login to get the valid user
-    user = login_controller.login()
-    osc_api = login_controller.osc_api
+    # user = login_controller.login()
+    # osc_api = login_controller.osc_api
+    osc_api = OSCApi(OSCAPISubDomain.PRODUCTION)
     # get all the sequneces for this user
-    sequences, error = osc_api.user_sequences(user.name, to_path)
+    sequences, error = osc_api.user_sequences(user_name)
 
     if error:
         print("Could not get sequences for the current user, try again or report a issue on "
