@@ -1,10 +1,9 @@
 import os
 import subprocess
 
-def ssl_create():
-    user = os.getenv('USER')
 
-    directory_path = f'/home/{user}/.config/mapilio/configs/MapSyncer/'
+def ssl_create():
+    directory_path = os.path.expanduser(f'~/.config/mapilio/configs/MapSyncer/')
 
     cert_file = f'{directory_path}cert.pem'
     key_file = f'{directory_path}key.pem'
