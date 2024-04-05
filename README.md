@@ -78,7 +78,7 @@ cd MapSyncer
 ```bash
 python -m venv mapsyncer_env
 
-# Ubuntu 
+# Ubuntu & MacOS
 source mapsyncer_env/bin/activate
 
 # Windows
@@ -88,7 +88,7 @@ mapsyncer_env/Scripts/activate
 3. Install the required dependencies:
 
 ```bash 
-pip install -r requirements.txt
+pip install -e .
 ```
 
 ## Usage
@@ -96,9 +96,7 @@ pip install -r requirements.txt
 The whole process will take place in one line 
 
 ```bash
-cd MapSyncer
-
-python run.py
+RunMapSyncer
 ```
 
 Then you can start the whole process by giving the **folder path** where you would like to download your images 💥.
