@@ -66,7 +66,7 @@ function fetchProgress(sequenceId, downloadFinished) {
 };
 
 
-function downloadSeq(sequenceId, to_path = 0) {
+function downloadSeq(sequenceId) {
     const button = document.getElementById('downloadButton_' + sequenceId);
     if (button) {
         handleButtonState(button, [buttonDisabledClass, buttonWarningClass], [buttonOutlineSecondaryClass], 'Downloading')
@@ -89,7 +89,6 @@ function downloadSeq(sequenceId, to_path = 0) {
             'Content-Type': 'application/x-www-form-urlencoded'
         },
         body: new URLSearchParams({
-            'to_path': to_path,
             'sequence_id': sequenceId
         })
     }).then(response => {
@@ -164,7 +163,7 @@ function downloadAll() {
 }
 
 
-function uploadSequence(sequenceId, button, to_path) {
+function uploadSequence(sequenceId, button) {
     handleButtonState(button, [buttonDisabledClass, buttonWarningClass], [buttonOutlineSecondaryClass], 'Uploading')
     storeData(sequenceId, uploadInProgress = true, downloadInProgress = false, downloadFinished = true, uploadFinished = false);
 
@@ -174,7 +173,6 @@ function uploadSequence(sequenceId, button, to_path) {
             'Content-Type': 'application/x-www-form-urlencoded'
         },
         body: new URLSearchParams({
-            'to_path': to_path,
             'sequence_id': sequenceId
         })
     }).then(response => {
@@ -234,68 +232,45 @@ function downloadRange(button) {
     button.textContent = 'Download range';
 }
 
-function getUserInfo(to_path) {
+function getUserInfo() {
     const infomessage = document.getElementById('info-message');
     infomessage.disabled = true;
     infomessage.textContent = 'Sequences are being fetched...';
     infomessage.style.display = 'block';
+    document.getElementById("fetchButton").disabled = true;
 
-    fetch('/get-user-name', {
+    fetch('/get-user-sequences', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
         }
     })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Response was not ok.');
-            }
-            return response.json();
-        })
-        .then(data => {
-            const user_name = data.user_name;
-
-            fetch('/get-user-sequences', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: new URLSearchParams({
-                    'user_name': user_name,
-                    'to_path': to_path,
-                })
-            })
-                .then(response => {
-                    if (!response.ok) {
-                        return response.json().then(data => {
-                            throw new Error(data.message);
-                        });
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    infomessage.textContent = 'Sequences fetched successfully!';
-                    infomessage.classList.add('alert', 'alert-success');
-                    setTimeout(() => {
-                        infomessage.style.display = 'none';
-                        window.location.reload();
-                    }, 1300);
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    infomessage.textContent = 'Error fetching sequences: ' + error.message;
-                    infomessage.style.display = 'block';
-                    infomessage.classList.add('alert', 'alert-danger', 'mt-3');
-                });
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            infomessage.textContent = 'Error fetching user name: ' + error.message;
-            infomessage.style.display = 'block';
-        });
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(data => {
+                throw new Error(data.message);
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        infomessage.textContent = 'Sequences fetched successfully!';
+        infomessage.classList.add('alert', 'alert-success');
+        setTimeout(() => {
+            infomessage.style.display = 'none';
+            window.location.reload();
+        }, 1300);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        infomessage.textContent = 'Error fetching sequences: ' + error.message;
+        infomessage.style.display = 'block';
+        infomessage.classList.add('alert', 'alert-danger', 'mt-3');
+    });
 }
 
-function getMissingSequences(to_path) {
+
+function getMissingSequences() {
     const infoMessageMissing = document.getElementById('info-message-missing')
     infoMessageMissing.textContent = 'Sequences are being fetched...';
     infoMessageMissing.classList.add('alert', 'alert-info');
@@ -303,7 +278,7 @@ function getMissingSequences(to_path) {
     infoMessageMissing.style.display = 'block';
     infoMessageMissing.disabled = true;
 
-    fetch('/get-user-name', {
+    fetch('/get-missing-sequences', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
@@ -316,44 +291,23 @@ function getMissingSequences(to_path) {
             return response.json();
         })
         .then(data => {
-            const user_name = data.user_name;
-
-            fetch('/get-missing-sequences', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: new URLSearchParams({
-                    'user_name': user_name,
-                    'to_path': to_path,
-                })
-            })
-                .then(response => {
-                    if (!response.ok) {
-                        return response.json().then(data => {
-                            throw new Error(data.message);
-                        });
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    infoMessageMissing.textContent = 'Sequences fetched successfully!';
-                    infoMessageMissing.classList.remove('alert', 'alert-info', 'alert-warning');
-                    infoMessageMissing.classList.add('alert', 'alert-success');
-                    setTimeout(() => {
-                        infoMessageMissing.style.display = 'none';
-                        window.location.reload();
-                    }, 1300);
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    infoMessageMissing.textContent = 'Error fetching sequences: ' + error.message;
-                    infoMessageMissing.style.display = 'block';
-                    infoMessageMissing.classList.remove('alert', 'alert-info', 'alert-warning');
-                    infoMessageMissing.classList.add('alert', 'alert-danger', 'mt-3');
-                });
+            infoMessageMissing.textContent = 'Sequences fetched successfully!';
+            infoMessageMissing.classList.remove('alert', 'alert-info', 'alert-warning');
+            infoMessageMissing.classList.add('alert', 'alert-success');
+            setTimeout(() => {
+                infoMessageMissing.style.display = 'none';
+                window.location.reload();
+            }, 1300);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            infoMessageMissing.textContent = 'Error fetching sequences: ' + error.message;
+            infoMessageMissing.style.display = 'block';
+            infoMessageMissing.classList.remove('alert', 'alert-info', 'alert-warning');
+            infoMessageMissing.classList.add('alert', 'alert-danger', 'mt-3');
         });
 }
+
 
 (function () {
     let activeseq = JSON.parse(localStorage.getItem("allEntries"));
