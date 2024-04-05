@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Kartaview Login Page</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary mt-4 rounded-4">
+            <a class="navbar-brand mx-4" href="#">MapSyncer</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarToggleExternalContent" aria-controls="navbarToggleExternalContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarToggleExternalContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 mx-4">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/display-sequence" tabindex="-1" aria-disabled="true" >Display Sequence</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/details">Detailed</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/sequence-edit">Sequence Edit</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </div>
+
+    <div class="container mt-5 text-center">
+        <p class="mt-5 text-center mb-4 h3">Kartaview Authenticate</p>
+        <div class="message h4 mb-4 text-danger" role="alert" aria-live="assertive" aria-atomic="true" id="errorMessage">Kartaview authentication not found. Please click the button below to proceed with Kartaview login.</div>
+        <form action="/authenticate-kartaview" method="post">
+            <button class="btn btn-primary" id="kartaLogin">Login to Kartaview</button>
+        </form>
+    </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

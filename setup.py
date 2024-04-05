@@ -51,7 +51,7 @@ setuptools.setup(
     install_requires=INSTALL_REQUIRES,
     entry_points={
         "console_scripts": [
-            "RunMapSyncer=MapSyncer.run:main"
+            "RunMapSyncer=MapSyncer.app:main"
         ]
     }
 )
