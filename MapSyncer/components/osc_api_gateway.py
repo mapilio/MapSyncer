@@ -1,22 +1,21 @@
 """This module is used as a gateway to the OSC api."""
 import asyncio
 import concurrent.futures
+import json
+import logging
 import os.path
 import shutil
-import logging
 from typing import Tuple, Optional, List
 
+import psutil
 import requests
+from colorama import Fore
+from tqdm import tqdm
+
 import osc_api_config
-from storage import Storage
 from osc_api_config import OSCAPISubDomain
 from osc_api_models import OSCSequence, OSCPhoto, OSCUser
-from colorama import Fore, init
-import json
-import subprocess
-import platform
-import psutil
-from tqdm import tqdm
+from storage import Storage
 
 LOGGER = logging.getLogger('osc_tools.osc_api_gateway')
 
@@ -114,30 +113,15 @@ class OSCApiMethods:
         """this method returns photo list URL"""
         return _osc_url(env) + '/' + _version() + '/sequence/photo-list/'
 
-    @classmethod
-    def video_upload(cls, env: OSCAPISubDomain) -> str:
-        """this method returns video upload URL"""
-        return _upload_url(env, 'video')
-
-    @classmethod
-    def photo_upload(cls, env: OSCAPISubDomain) -> str:
-        """this method returns photo upload URL"""
-        return _upload_url(env, 'photo')
-
-    @classmethod
-    def login(cls, env: OSCAPISubDomain, provider: str) -> Optional[str]:
-        """this method returns login URL"""
-        if provider == "google":
-            return _osc_url(env) + '/auth/google/client_auth'
-        if provider == "facebook":
-            return _osc_url(env) + '/auth/facebook/client_auth'
-        # default to OSM
-        return _osc_url(env) + '/auth/openstreetmap/client_auth'
-
-    @classmethod
-    def finish_upload(cls, env: OSCAPISubDomain) -> str:
-        """this method returns a finish upload url"""
-        return _osc_url(env) + '/' + _version() + '/sequence/finished-uploading/'
+    # @classmethod
+    # def login(cls, env: OSCAPISubDomain, provider: str) -> Optional[str]:
+    #     """this method returns login URL"""
+    #     if provider == "google":
+    #         return _osc_url(env) + '/auth/google/client_auth'
+    #     if provider == "facebook":
+    #         return _osc_url(env) + '/auth/facebook/client_auth'
+    #     # default to OSM
+    #     return _osc_url(env) + '/auth/openstreetmap/client_auth'
 
 
 class OSCApi:
@@ -166,40 +150,6 @@ class OSCApi:
             print("Invalid choice!")
             self.calculate_disk_space(total_items, path)
 
-    @classmethod
-    def __upload_response_success(cls, response: requests.Response,
-                                  upload_type: str,
-                                  index: int,
-                                  sequence_id: int) -> bool:
-        if response is None:
-            return False
-        try:
-            json_response = response.json()
-            if response.status_code != 200:
-                if "status" in json_response and \
-                        "apiMessage" in json_response["status"] and \
-                        "duplicate entry" in json_response["status"]["apiMessage"]:
-                    LOGGER.debug("Received duplicate %s index: %d, photo_id %s sequence_id %s",
-                                 upload_type,
-                                 index,
-                                 None,
-                                 sequence_id)
-                    return True
-                LOGGER.debug("Failed to upload %s index: %d response:%s sequence_id %s",
-                             upload_type,
-                             index,
-                             json_response,
-                             sequence_id)
-                return False
-
-            if ("osv" in json_response and
-                    (("photo" in json_response["osv"] and "id" in json_response["osv"]["photo"]) or
-                     ("video" in json_response["osv"] and "id" in json_response["osv"]["video"]))):
-                return True
-        except ValueError:
-            return False
-        return False
-
     def _sequence_page(self, user_name, page, pbar) -> Tuple[List[OSCSequence], Exception]:
         try:
             parameters = {'ipp': 500,
@@ -225,50 +175,50 @@ class OSCApi:
         except requests.RequestException as ex:
             return None, ex
 
-    def authorized_user(self, provider: str, token: str, secret: str) -> Tuple[OSCUser, Exception]:
-        """This method will get a authorization token for OSC API"""
-        try:
-            data_access = {'request_token': token,
-                           'secret_token': secret
-                           }
-            login_url = OSCApiMethods.login(self.environment, provider)
-            response = requests.post(url=login_url, data=data_access)
-            json_response = response.json()
-
-            if 'osv' in json_response:
-                osc_data = json_response['osv']
-                user = OSCUser()
-                missing_field = None
-                if 'access_token' in osc_data:
-                    user.access_token = osc_data['access_token']
-                else:
-                    missing_field = "access token"
-
-                if 'id' in osc_data:
-                    user.user_id = osc_data['id']
-                else:
-                    missing_field = "id"
-
-                if 'username' in osc_data:
-                    user.name = osc_data['username']
-                else:
-                    missing_field = "username"
-
-                if 'full_name' in osc_data:
-                    user.full_name = osc_data['full_name']
-                else:
-                    missing_field = "fullname"
-
-                if missing_field is not None:
-                    return None, Exception("OSC API bug. OSCUser missing " + missing_field)
-
-            else:
-                return None, Exception("OSC API bug. OSCUser missing username")
-
-        except requests.RequestException as ex:
-            return None, ex
-
-        return user, None
+    # def authorized_user(self, provider: str, token: str, secret: str) -> Tuple[OSCUser, Exception]:
+    #     """This method will get a authorization token for OSC API"""
+    #     try:
+    #         data_access = {'request_token': token,
+    #                        'secret_token': secret
+    #                        }
+    #         login_url = OSCApiMethods.login(self.environment, provider)
+    #         response = requests.post(url=login_url, data=data_access)
+    #         json_response = response.json()
+    #
+    #         if 'osv' in json_response:
+    #             osc_data = json_response['osv']
+    #             user = OSCUser()
+    #             missing_field = None
+    #             if 'access_token' in osc_data:
+    #                 user.access_token = osc_data['access_token']
+    #             else:
+    #                 missing_field = "access token"
+    #
+    #             if 'id' in osc_data:
+    #                 user.user_id = osc_data['id']
+    #             else:
+    #                 missing_field = "id"
+    #
+    #             if 'username' in osc_data:
+    #                 user.name = osc_data['username']
+    #             else:
+    #                 missing_field = "username"
+    #
+    #             if 'full_name' in osc_data:
+    #                 user.full_name = osc_data['full_name']
+    #             else:
+    #                 missing_field = "fullname"
+    #
+    #             if missing_field is not None:
+    #                 return None, Exception("OSC API bug. OSCUser missing " + missing_field)
+    #
+    #         else:
+    #             return None, Exception("OSC API bug. OSCUser missing username")
+    #
+    #     except requests.RequestException as ex:
+    #         return None, ex
+    #
+    #     return user, None
 
     def get_photos(self, sequence_id, page=None) -> Tuple[List[OSCPhoto], Optional[Exception]]:
         try:
@@ -336,7 +286,7 @@ class OSCApi:
             return ex
         return None
 
-    def user_sequences(self, user_name: str, to_path: str) -> Tuple[List[OSCSequence], Exception]:
+    def user_sequences(self, user_name: str) -> Tuple[List[OSCSequence], Exception]:
         MERGED_RESPONSE = os.path.join(
             os.path.expanduser("~"),
             ".config",
@@ -346,7 +296,7 @@ class OSCApi:
             f"{user_name}_sequences_logs.json"
         )
         if not os.path.exists(MERGED_RESPONSE):
-            sequences, error = self._user_sequences(user_name, to_path)
+            sequences, error = self._user_sequences(user_name)
         else:
             sequences = []
             with open(MERGED_RESPONSE, 'r') as f:
@@ -361,7 +311,7 @@ class OSCApi:
             error = None
         return sequences, error
 
-    def get_missing_sequences(self, user_name: str, to_path: str) -> Tuple[List[OSCSequence], Exception]:
+    def get_missing_sequences(self, user_name: str) -> Tuple[List[OSCSequence], Exception]:
         MERGED_RESPONSE = os.path.join(
             os.path.expanduser("~"),
             ".config",
@@ -371,7 +321,7 @@ class OSCApi:
             f"{user_name}_sequences_logs.json"
         )
         if os.path.exists(MERGED_RESPONSE):
-            sequences, error = self._user_sequences(user_name, to_path)
+            sequences, error = self._user_sequences(user_name)
         else:
             print("Json response not found")
 
@@ -409,14 +359,14 @@ class OSCApi:
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
             loop = asyncio.new_event_loop()
-            print(f"{Fore.LIGHTCYAN_EX}Fetching from Kartaview is a singular event. Future synchronizations will be completed more swiftly. Feel free to focus on other tasks while we handle this for you ☕️.{Fore.RESET}")
+            print(
+                f"{Fore.LIGHTCYAN_EX}Fetching from Kartaview is a singular event. Future synchronizations will be completed more swiftly. Feel free to focus on other tasks while we handle this for you ☕️.{Fore.RESET}")
             pbar = tqdm(total=30, desc="Fetching sequences")  # Total is pages_count - 1 because range starts from 2
             futures = [
                 loop.run_in_executor(executor,
                                      self._sequence_page, user_name, page, pbar)
                 for page in range(2, 30)
             ]
-
 
             MERGED_RESPONSE = os.path.join(
                 os.path.expanduser("~"),
@@ -429,7 +379,6 @@ class OSCApi:
 
             with open(MERGED_RESPONSE, "w") as file:
                 json.dump(merged_json_response, file)
-            
 
             if not futures:
                 loop.close()
