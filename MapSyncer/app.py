@@ -367,7 +367,7 @@ def remove_accounts():
 def main():
     ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
     ssl_context.load_cert_chain(CERT_PEM, KEY_PEM)
-    app.run(host='127.0.0.1', port=5050, threaded=True, debug=True, ssl_context=ssl_context)
+    app.run(host='0.0.0.0', port=5050, threaded=True, debug=True, ssl_context=ssl_context)
 
 
 if __name__ == '__main__':
