@@ -170,6 +170,18 @@ function downloadSequence(sequenceId, uploadInProgress = false, downloadInProgre
 
 function downloadAll() {
     var downloadButtons = document.querySelectorAll('[id^="downloadButton"]');
+    if (downloadButtons.length === 0) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Warning',
+            text: 'No items to download found on this page!',
+            showCancelButton: false,
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true
+        });
+        return;
+    }
     downloadButtons.forEach(function (button) {
         if (!button.classList.contains('disabled')) {
             button.click();
@@ -179,6 +191,18 @@ function downloadAll() {
 
 function uploadAll() {
     var uploadButtons = document.querySelectorAll('[id^="uploadButton"]');
+    if (uploadButtons.length === 0) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Warning',
+            text: 'No items to upload found on this page!',
+            showCancelButton: false,
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true
+        });
+        return;
+    }
     uploadButtons.forEach(function (button) {
         if (!button.classList.contains('disabled')) {
             button.click();
