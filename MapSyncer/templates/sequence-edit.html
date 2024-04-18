@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='mapilio_fav.png') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            font-family: 'Montserrat', sans-serif;
+        }
+    </style>
     <title>Sequence Edit</title>
 </head>
 <body>
@@ -28,6 +35,11 @@
                         <a class="nav-link" href="/sequence-edit">Sequence Edit</a>
                     </li>
                 </ul>
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item mx-4">
+                        <a class="nav-link" href="" onclick="logout(event)">Logout</a>
+                    </li>
+                </ul>
             </div>
         </nav>
     </div>
@@ -36,7 +48,7 @@
         <h1 class="mt-5 text-center mb-5">Sequence Edit</h1>
         <div class="card text-white bg-secondary mb-3">
           <div class="card-body">
-            <h5 class="card-title"><b>Note:</b> In some sequences, if you think that one of the operations listed below was not successful, select the operation and set the value to false. then restart the operation.</h5>
+            <h5 class="card-title"><b>Note:</b> If you believe that one of the operations listed below was unsuccessful, select the operation and set its value to false, then restart the operation.</h5>
           </div>
             <h5 class="card-title bg-danger p-2 rounded mx-2"><b> Important:</b> It is not recommended to use it unless necessary.</h5>
         </div>
@@ -52,7 +64,7 @@
                 <select class="form-select" id="key" name="key">
                     <option value="download_success">Download Successful</option>
                     <option value="upload_success">Upload Successful</option>
-                    <option value="json_success">JSON Fetching Successful</option>
+                    <option value="json_success">Metadata Fetching Successful</option>
                 </select>
             </div>
             <div class="input-group mb-3">
@@ -69,6 +81,8 @@
 
     <script src="{{ url_for('static', filename='edit-sequence.js') }}"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    <script src="{{ url_for('static', filename='global.js') }}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
 </body>

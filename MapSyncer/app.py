@@ -122,9 +122,10 @@ def check_status(sequence_id):
 @app.route('/mapilio-login', methods=['POST'])
 def mapilio_login():
     args = get_args_mapilio(edit_config)
-    username = request.form['username'].strip()
     email = request.form['email'].strip()
     password = request.form['password'].strip()
+
+    username = email.split('@')[0]
 
     args["user_name"] = username
     args["user_email"] = email
@@ -153,7 +154,7 @@ def display_sequence():
     check_authenticate = False
 
     if len(list_all_users()) == 0:
-        return render_template('mapilio-login.html')
+        return render_template('mapilio-login.html', karta_authenticate=True)
     elif len(list_all_users()) >= 2:
         username = input("Found multiple Mapilio accounts. Please specify your username.\n")
     else:
@@ -342,6 +343,25 @@ def get_missing_sequences():
         return jsonify({"status": "error", "message": str(error)}), 500
     else:
         return jsonify({'status': 'success', 'message': "Sequences successfully fetched"}), 200
+
+
+@app.route('/remove-accounts', methods=['GET'])
+def remove_accounts():
+    MAPILIO_CONFIG_PATH = os.getenv(
+        "MAPILIO_CONFIG_PATH",
+        os.path.join(
+            os.path.expanduser("~"),
+            ".config",
+            "mapilio",
+            "configs",
+            "CLIENT_USERS",
+        ),
+    )
+    if os.path.exists(MAPILIO_CONFIG_PATH):
+        os.remove(MAPILIO_CONFIG_PATH)
+    session.clear()
+
+    return jsonify(success=True), 200
 
 
 def main():

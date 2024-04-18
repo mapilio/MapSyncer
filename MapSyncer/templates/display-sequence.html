@@ -6,8 +6,14 @@
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='mapilio_fav.png') }}">
     <title>Sequence List</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 
     <style>
+        * {
+            font-family: 'Montserrat', sans-serif;
+        }
+
         .card-text {
             overflow: hidden;
             text-overflow: ellipsis;
@@ -36,9 +42,15 @@
                         <a class="nav-link" href="/sequence-edit">Sequence Edit</a>
                     </li>
                 </ul>
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item mx-4">
+                        <a class="nav-link" href="" onclick="logout(event)">Logout</a>
+                    </li>
+                </ul>
             </div>
         </nav>
     </div>
+
 
     <div class="container mt-5">
         <h1 class="mt-5 text-center mb-4">Sequence IDs with Locations</h1>
@@ -49,6 +61,19 @@
             <div class="text-center">
                 <button type="button" class="btn btn-primary mb-3" onclick="getUserInfo()" id="fetchButton">Fetch User Sequences</button>
             </div>
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    Swal.fire({
+                        icon: 'success',
+                        title: "It's all over!",
+                        text: "You can now upload your images.",
+                        timer: 2000,
+                        timerProgressBar: true,
+                        showConfirmButton: false
+                    })
+                    document.getElementById('fetchButton').click();
+                });
+            </script>
         {% else %}
         <div>
             <form id="downloadForm" class="mb-4">
@@ -66,6 +91,7 @@
                     <div class="col-12 text-center">
                         <button type="button" class="btn btn-primary mt-3 me-md-2" onclick="downloadRange(this)">Download range</button>
                         <button type="button" class="btn btn-primary mt-3 ms-md-2" onclick="downloadAll()">Download all sequences</button>
+                        <button type="button" class="btn btn-primary mt-3 ms-md-2" onclick="uploadAll()">Upload all sequences</button>
                     </div>
                 </div>
             </form>
@@ -159,6 +185,9 @@
         </div>
         {% endif %}
     </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="{{ url_for('static', filename='global.js') }}"></script>
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
     <script>
         var user_name = "{{ user_name }}";
         if (user_name === "None" || user_name === null || user_name === "") {
@@ -167,8 +196,6 @@
             localStorage.setItem('user_name', user_name);
         }
       </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="{{ url_for('static', filename='app.js') }}"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
 </body>
