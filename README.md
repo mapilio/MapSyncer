@@ -52,7 +52,7 @@ MapSyncer depends on the following libraries that need to be installed before bu
 
 ## Pip Installation and Usage
 
-You may simply install and use the MapSyncer by using these commands below;
+<b>Note:</b> To install MapSyncer, you'll need to have Python and Pip installed on your system. Ensure you have Python version above <b>3.6</b> but below <b>3.12</b>. If you meet these criteria, please run the following commands:
 
 ```bash
 # Installation
