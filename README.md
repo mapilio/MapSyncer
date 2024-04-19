@@ -32,16 +32,14 @@ Please, follow the steps below to get started:
 
 
 ## Workflow
-The download command follows these steps below:
-
-1. Authenticate the user with OpenStreetMap (OSM) account via Kartaview.
-2. Get the list of sequences uploaded by the user.
-3. Download all images and metadata for each sequence.
-4. Authenticate for Mapilio.
-5. You can select the specific sequences you want to upload to Mapilio or all downloaded sequences.
+1. Authenticate for OpenStreetMap.
+2. Authenticate for Mapilio.
+3. Get the list of sequences uploaded by the user.
+4. Download all images and metadata for each sequence.
+5. You can select specific sequences or all downloaded sequences that you want to upload to Mapilio.
 6. And the process ends successfully.
 
-Don't worry, run.py will lead all this for you 💫. 
+Don't worry, the RunMapSyncer command will check and do all these operations. 💫
 
 
 ## Install dependencies
@@ -63,6 +61,9 @@ pip install mapsyncer
 # CLI Usage
 RunMapSyncer
 ```
+<p>
+   When accessing the provided address, you may encounter a security warning stating <b>"Your connection is not private"</b> in your web browser. To proceed, please click the <b>"Advanced"</b> button and select the option to continue to the site. This warning is due to the SSL certificate currently being in the process of approval and will be validated shortly.
+</p>
 
 ## Manual Installation
 
