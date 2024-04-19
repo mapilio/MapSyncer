@@ -76,7 +76,6 @@ function downloadSeq(sequenceId) {
 
     const progressBarContainer = document.getElementById('progressBarContainer_' + sequenceId);
     const progressBar = document.getElementById('progressBar_' + sequenceId);
-    const progressCount = document.getElementById('progressCount_' + sequenceId);
 
     if (progressBar && progressBarContainer) {
         progressBar.parentElement.style.visibility = 'visible';
@@ -94,29 +93,45 @@ function downloadSeq(sequenceId) {
     }).then(response => {
         if (response.ok) {
             handleButtonState(button, [buttonSuccessClass, buttonDisabledClass], [buttonWarningClass, buttonDangerClass], 'Downloaded')
-            alert('Sequence ' + sequenceId + ' downloaded successfully!');
-            setTimeout(function () {
-                document.getElementById('disableUpload_' + sequenceId).classList.remove('disabled');
-                progressBar.parentElement.style.visibility = 'hidden';
-                progressBarContainer.classList.remove('my-2');
-                downloadFinished = true;
-                storeData(sequenceId, false, false, true, false);
-                if (downloadFinished) {
-                    clearInterval(loop[sequenceId]);
-                    return;
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: 'Sequence ' + sequenceId + ' downloaded successfully!',
+                timer: 2000,
+                timerProgressBar: true,
+                showConfirmButton: false,
+                onClose: () => {
+                    document.getElementById('disableUpload_' + sequenceId).classList.remove('disabled');
+                    progressBar.parentElement.style.visibility = 'hidden';
+                    progressBarContainer.classList.remove('my-2');
+                    downloadFinished = true;
+                    storeData(sequenceId, false, false, true, false);
+                    if (downloadFinished) {
+                        clearInterval(loop[sequenceId]);
+                    }
                 }
-            }, 2000);
+            });
         } else {
             handleButtonState(button, [buttonDangerClass], [buttonDisabledClass, buttonWarningClass], 'Failed, Try again.')
-            alert('Failed to download sequence ' + sequenceId + '. You can try again.');
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Failed to download sequence ' + sequenceId + '. You can try again.'
+            });
         }
     }).catch(error => {
         console.error('Error during sequence download:', error);
         if (button) {
             handleButtonState(button, [buttonWarningClass], [buttonDisabledClass], 'Error, Try again.')
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Error during sequence download. Please try again.'
+            });
         }
     });
 }
+
 
 function storeData(sequenceId, uploadInProgress, downloadInProgress, downloadFinished, uploadFinished) {
     var existingEntries = JSON.parse(localStorage.getItem("allEntries")) || [];
@@ -155,12 +170,59 @@ function downloadSequence(sequenceId, uploadInProgress = false, downloadInProgre
 
 function downloadAll() {
     var downloadButtons = document.querySelectorAll('[id^="downloadButton"]');
+    if (downloadButtons.length === 0) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Warning',
+            text: 'No items to download found on this page!',
+            showCancelButton: false,
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true
+        });
+        return;
+    }
     downloadButtons.forEach(function (button) {
         if (!button.classList.contains('disabled')) {
             button.click();
         }
     });
 }
+
+function uploadAll() {
+    var uploadButtons = document.querySelectorAll('[id^="uploadButton"]');
+    var disabledButtons = document.querySelectorAll('[id^="disableUpload"]');
+
+    var enabledDisabledButtons = Array.from(disabledButtons).filter(function(button) {
+        return !button.classList.contains('disabled');
+    });
+
+    if (uploadButtons.length === 0 && enabledDisabledButtons.length === 0) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Warning',
+            text: 'No items to upload found on this page!',
+            showCancelButton: false,
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true
+        });
+        return;
+    }
+
+    uploadButtons.forEach(function (button) {
+        if (!button.classList.contains('disabled')) {
+            button.click();
+        }
+    });
+
+    disabledButtons.forEach(function (button) {
+        if (!button.classList.contains('disabled')) {
+            button.click();
+        }
+    });
+}
+
 
 
 function uploadSequence(sequenceId, button) {
@@ -180,20 +242,41 @@ function uploadSequence(sequenceId, button) {
     }).then(data => {
         if (data.status === 'success') {
             handleButtonState(button, [buttonSuccessClass, buttonDisabledClass], [buttonDangerClass, buttonWarningClass], 'Uploaded')
-            uploadFinished = true
+            uploadFinished = true;
             storeData(sequenceId, false, false, true, true);
-            alert('Sequence ' + sequenceId + ' uploaded successfully!');
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: 'Sequence ' + sequenceId + ' uploaded successfully!',
+                showCancelButton: false,
+                showConfirmButton: false,
+                timer: 2000,
+                timerProgressBar: true
+            });
         } else {
             handleButtonState(button, [buttonDangerClass], [buttonDisabledClass, buttonWarningClass], 'Failed, Try again.')
-            uploadFinished = false
+            uploadFinished = false;
             storeData(sequenceId, false, false, true, false);
-            alert('Sequence ' + sequenceId + ' could not be uploaded. ' + data.message);
+
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Sequence ' + sequenceId + ' could not be uploaded. ' + data.message
+            });
         }
     }).catch(error => {
         console.error('Error during sequence upload:', error);
         handleButtonState(button, [buttonWarningClass], [buttonDisabledClass, buttonWarningClass], 'Error, Try again.')
+
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Error during sequence upload. Please try again.'
+        });
     });
 }
+
 
 function downloadRange(button) {
     button.classList.add('disabled', 'btn-warning');
@@ -204,7 +287,11 @@ function downloadRange(button) {
     if (startNumberID === "" || endNumberID === "") {
         button.classList.remove('disabled', 'btn-warning');
         button.textContent = 'Download range';
-        alert("Please enter start and end sequence Number IDs.");
+        Swal.fire({
+            icon: 'warning',
+            title: 'Warning',
+            text: 'Please enter start and end sequence Number IDs.'
+        });
         return;
     }
 
@@ -326,7 +413,7 @@ function getMissingSequences() {
             const isUploadInProgress = entry["uploadInProgress"];
 
             if (isDownloadInProgress) {
-                downloadSequence(sequenceId, false, true);
+                downloadSequence(sequenceId, false, true, false, false);
                 const progressBar = document.getElementById('progressBar_' + sequenceId);
                 const progressBarContainer = document.getElementById('progressBarContainer_' + sequenceId);
                 const downloadButton = document.getElementById('downloadButton_' + sequenceId);
@@ -377,4 +464,3 @@ document.addEventListener("DOMContentLoaded", function () {
       getMissingSequences();
     });
 });
-
