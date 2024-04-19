@@ -1,9 +1,9 @@
 services:
   mapsyncer:
     image: mapsyncer
-    container_name: syncer
+    container_name: mapsyncer
     build: .
     stdin_open: true
     tty: true
     ports:
-      - "127.0.0.1:5050:5050"
+      - "5050:5050"

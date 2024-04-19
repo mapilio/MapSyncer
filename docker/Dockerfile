@@ -17,7 +17,4 @@ RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1
 
 RUN python3 -m pip install --upgrade pip
 
-RUN git clone https://github.com/mapilio/MapSyncer.git
-
-WORKDIR /app/MapSyncer
-RUN pip install -e .
+RUN python3 -m pip install --upgrade git+https://github.com/mapilio/mapsyncer
