@@ -191,7 +191,13 @@ function downloadAll() {
 
 function uploadAll() {
     var uploadButtons = document.querySelectorAll('[id^="uploadButton"]');
-    if (uploadButtons.length === 0) {
+    var disabledButtons = document.querySelectorAll('[id^="disableUpload"]');
+
+    var enabledDisabledButtons = Array.from(disabledButtons).filter(function(button) {
+        return !button.classList.contains('disabled');
+    });
+
+    if (uploadButtons.length === 0 && enabledDisabledButtons.length === 0) {
         Swal.fire({
             icon: 'warning',
             title: 'Warning',
@@ -203,12 +209,20 @@ function uploadAll() {
         });
         return;
     }
+
     uploadButtons.forEach(function (button) {
         if (!button.classList.contains('disabled')) {
             button.click();
         }
     });
+
+    disabledButtons.forEach(function (button) {
+        if (!button.classList.contains('disabled')) {
+            button.click();
+        }
+    });
 }
+
 
 
 function uploadSequence(sequenceId, button) {
