@@ -345,7 +345,10 @@ class OSCApi:
             return None, ex
 
         if 'totalFilteredItems' not in json_response:
-            return [], Exception("OSC API bug missing totalFilteredItems from response")
+            api_message = json_response.get('status', {}).get('apiMessage', 'Unknown Error')
+            if api_message == "Invalid username!":
+                return [], Exception("No Kartaview account associated with OpenStreetMap was found.")
+            return [], Exception(f"OSC API error: {api_message}")
 
         total_items = int(json_response['totalFilteredItems'][0])
         pages_count = int(total_items / parameters['ipp']) + 1
