@@ -3,6 +3,7 @@ import math
 import os
 import shutil
 import ssl
+import webbrowser
 
 from flask import Flask, render_template, request, jsonify, redirect, url_for, session
 from mapilio_kit.base import authenticator
@@ -367,8 +368,8 @@ def remove_accounts():
 def main():
     ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
     ssl_context.load_cert_chain(CERT_PEM, KEY_PEM)
-    app.run(host='0.0.0.0', port=5050, threaded=True, debug=True, ssl_context=ssl_context)
-
+    webbrowser.open('https://127.0.0.1:5050')
+    app.run(host='0.0.0.0', port=5050, threaded=True, debug=False, ssl_context=ssl_context)
 
 if __name__ == '__main__':
     main()
