@@ -16,26 +16,12 @@ from MapSyncer.components.download import download_user_images, check_sequence_s
 from MapSyncer.components.osc_api_gateway import OSCAPISubDomain
 from MapSyncer.components.osc_api_gateway import OSCApi
 from MapSyncer.components.ssl import ssl_create
+from MapSyncer.config import DOWNLOAD_LOGS, IMAGES_PATH, CERT_PEM, KEY_PEM, MAPILIO_API_ENDPOINT, MAPILIO_CONFIG_PATH, client_id, \
+    client_secret
 
 ssl_create()
 app = Flask(__name__)
 app.secret_key = "nnp6kt5DEheyZha8ez2WUSzJ"
-
-DOWNLOAD_LOGS = os.path.join(os.path.expanduser("~"), ".config", "mapilio", "configs", "MapSyncer",
-                             "download_logs.json")
-
-IMAGES_PATH = os.path.join(os.path.expanduser("~"), ".cache", "mapilio", "MapSyncer",
-                           "images")
-
-CERT_PEM = os.path.join(os.path.expanduser("~"), ".config", "mapilio", "configs", "MapSyncer",
-                        "cert.pem")
-
-KEY_PEM = os.path.join(os.path.expanduser("~"), ".config", "mapilio", "configs", "MapSyncer",
-                       "key.pem")
-
-MAPILIO_API_ENDPOINT = "https://end.mapilio.com"
-client_id = 8
-client_secret = "7TccnOQOdxnUIFgOjFiotiuFC4lWQhMeilddgxJJ"
 
 
 def get_args_mapilio(func):
@@ -62,16 +48,6 @@ def load_data():
 
 
 def remove_mapilio_account():
-    MAPILIO_CONFIG_PATH = os.getenv(
-        "MAPILIO_CONFIG_PATH",
-        os.path.join(
-            os.path.expanduser("~"),
-            ".config",
-            "mapilio",
-            "configs",
-            "CLIENT_USERS",
-        ),
-    )
     if os.path.exists(MAPILIO_CONFIG_PATH):
         os.remove(MAPILIO_CONFIG_PATH)
         return True
@@ -417,16 +393,6 @@ def remove_accounts():
     """
     Logs out of both Kartaview and Mapilio accounts.
     """
-    MAPILIO_CONFIG_PATH = os.getenv(
-        "MAPILIO_CONFIG_PATH",
-        os.path.join(
-            os.path.expanduser("~"),
-            ".config",
-            "mapilio",
-            "configs",
-            "CLIENT_USERS",
-        ),
-    )
     if os.path.exists(MAPILIO_CONFIG_PATH):
         os.remove(MAPILIO_CONFIG_PATH)
     session.clear()
