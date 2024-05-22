@@ -358,7 +358,7 @@ def upload_sequence():
             if log_entry["upload_success"]:
                 return jsonify({"status": "success", "message": "Sequence already uploaded"}), 200
             else:
-                result = os.system(f"mapilio_kit upload --processed --dry_run {upload_folder_path}")
+                result = os.system(f"mapilio_kit upload --processed {upload_folder_path}")
                 if result != 0:
                     print(f"Error occurred while uploading {sequence_id}")
                     return jsonify({"status": "error",
