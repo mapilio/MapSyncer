@@ -16,7 +16,8 @@ from MapSyncer.components.download import download_user_images, check_sequence_s
 from MapSyncer.components.osc_api_gateway import OSCAPISubDomain
 from MapSyncer.components.osc_api_gateway import OSCApi
 from MapSyncer.components.ssl import ssl_create
-from MapSyncer.config import DOWNLOAD_LOGS, IMAGES_PATH, CERT_PEM, KEY_PEM, MAPILIO_API_ENDPOINT, MAPILIO_CONFIG_PATH, client_id, \
+from MapSyncer.config import DOWNLOAD_LOGS, IMAGES_PATH, CERT_PEM, KEY_PEM, MAPILIO_API_ENDPOINT, MAPILIO_CONFIG_PATH, \
+    client_id, \
     client_secret
 
 ssl_create()
@@ -144,15 +145,42 @@ def mapilio_login():
 
 @app.route('/mapilio-login-with-osm', methods=['POST'])
 def mapilio_login_with_osm():
-    token = osm_token_to_mapilio['access_token']
-    resp = requests.post(f"{MAPILIO_API_ENDPOINT}/oauth-api/openstreetmap/authenticate",
-                         params={"token": token, "client_id": client_id,
-                                 "client_secret": client_secret})
-    resp_json = resp.json()
-    if resp.status_code == 200:
-        mapilio_access_token = resp_json.get('access_token')
-        return jsonify({"access_token": mapilio_access_token})
-    return jsonify({"error": "Mapilio authentication failed", "status_code": resp.status_code})
+    token = osm_token_to_mapilio.get('access_token')
+    if not token:
+        return jsonify({"status": "error", "message": "OSM token not found"}), 400
+
+    resp_osm_login = requests.post(f"{MAPILIO_API_ENDPOINT}/oauth-api/openstreetmap/authenticate",
+                                   params={"token": token, "client_id": client_id,
+                                           "client_secret": client_secret})
+
+    if resp_osm_login.status_code == 200:
+        mapilio_access_token = resp_osm_login.json().get('access_token')
+        try:
+            resp_mapilio_profile = requests.post(f"{MAPILIO_API_ENDPOINT}/api/function/user_profile/profile/getProfile",
+                                                 headers={"Authorization": f"Bearer {mapilio_access_token}"})
+
+            if resp_mapilio_profile.status_code == 200:
+                settingsMail = resp_mapilio_profile.json().get('response', {}).get('email')
+                settingsUserName = resp_mapilio_profile.json().get('response', {}).get('username')
+                settingsUserKey = resp_mapilio_profile.json().get('response', {}).get('id')
+                user_upload_token = mapilio_access_token
+
+                with open(MAPILIO_CONFIG_PATH, 'w') as file:
+                    file.write(f"[{settingsMail}]\n")
+                    file.write(f"SettingsEmail = {settingsMail}\n")
+                    file.write(f"SettingsUsername = {settingsUserName}\n")
+                    file.write(f"SettingsUserKey = {settingsUserKey}\n")
+                    file.write(f"user_upload_token = {user_upload_token}\n")
+
+                return redirect(url_for('display_sequence'))
+            else:
+                return jsonify({"status": "error", "message": "Failed to get Mapilio profile"}), 500
+        except Exception as e:
+            return jsonify(
+                {"status": "error", "message": "Mapilio authentication failed with OSM", "exception": str(e)}), 500
+    else:
+        return jsonify({"status": "error", "message": "Mapilio authentication failed with OSM",
+                        "status_code": resp_osm_login.status_code}), 500
 
 
 @app.route('/display-sequence', methods=['GET'])
