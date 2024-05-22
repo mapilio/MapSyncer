@@ -65,7 +65,10 @@
                     </div>
                     <div class="card-body">
                         <form action="/mapilio-login" method="POST" class="w-100">
-                            <a href="/mapilio-login-with-osm" class="btn btn-primary mb-3 rounded-5"><img src="{{ url_for('static', filename='osm_ico.png') }}" style="max-width:25px;"> OpenStreetMap</a>
+                            <a href="#" onclick="sendPostRequest('/mapilio-login-with-osm');" class="btn btn-primary mb-3 rounded-5">
+                                <img src="{{ url_for('static', filename='osm_ico.png') }}" style="max-width:25px;"> OpenStreetMap
+                            </a>
+
                             <div style="display: flex; align-items: center;">
                               <div style="flex-grow: 1; height: 1px; background-color: black;"></div>
                               <span style="padding: 0 10px;">or Sign in with Email</span>
@@ -95,6 +98,15 @@
             </div>
         </div>
     </div>
+    <script>
+        function sendPostRequest(url) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = url;
+            document.body.appendChild(form);
+            form.submit();
+        }
+    </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
     <script src="{{ url_for('static', filename='global.js') }}"></script>
