@@ -46,13 +46,12 @@ Don't worry, the RunMapSyncer command will check and do all these operations. ðŸ
 
 MapSyncer depends on the following libraries that need to be installed before building it.<br>
 
-* [Mapilio Kit](https://github.com/mapilio/mapilio-kit) `In case you would like to follow the manual way you should install mapilio-kit manually.`
 * [Exiftool](https://exiftool.org/install.html)
 
 
 ## Pip Installation and Usage
 
-You may simply install and use the MapSyncer by using these commands below;
+<b>Note:</b> To install MapSyncer, you'll need to have Python and Pip installed on your system. Ensure you have Python version above <b>3.6</b> but below <b>3.12</b>. If you meet these criteria, please run the following commands:
 
 ```bash
 # Installation
@@ -61,6 +60,7 @@ pip install mapsyncer
 # CLI Usage
 RunMapSyncer
 ```
+<p>Once RunMapSyncer is running, https://127.0.0.1:5050 will open in your default web browser.</p>
 <p>
    When accessing the provided address, you may encounter a security warning stating <b>"Your connection is not private"</b> in your web browser. To proceed, please click the <b>"Advanced"</b> button and select the option to continue to the site. This warning is due to the SSL certificate currently being in the process of approval and will be validated shortly.
 </p>
@@ -99,8 +99,7 @@ The whole process will take place in one line
 ```bash
 RunMapSyncer
 ```
-
-Then you can start the whole process by giving the **folder path** where you would like to download your images ðŸ’¥.
+Once RunMapSyncer is running, https://127.0.0.1:5050 will open in your default web browser.
 
 
 ## Clean Up
