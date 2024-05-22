@@ -149,7 +149,6 @@ def mapilio_login_with_osm():
                          params={"token": token, "client_id": client_id,
                                  "client_secret": client_secret})
     resp_json = resp.json()
-    print(resp_json)
     if resp.status_code == 200:
         mapilio_access_token = resp_json.get('access_token')
         return jsonify({"access_token": mapilio_access_token})
