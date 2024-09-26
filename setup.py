@@ -29,7 +29,7 @@ INSTALL_REQUIRES = [
     'psutil',
     'flask',
     'python-dotenv',
-    'osm-login-python'
+    'osm-login-python==1.0.0'
 ]
 
 setuptools.setup(
