@@ -100,16 +100,16 @@ def callback():
     access_token = osm_auth.callback(request.url)
     osm_token_to_mapilio = osm_auth.oauth.token
     parsed_data = json.loads(json.dumps(access_token))
-    token = parsed_data['access_token']
+    token = parsed_data['user_data']
     if access_token:
         return redirect('https://127.0.0.1:5050/get_my_data/' + token)
     else:
         return redirect('https://127.0.0.1:5050/login')
 
 
-@app.route('/get_my_data/<access_token>', methods=['GET'])
-def get_my_data(access_token):
-    user_data = osm_auth.deserialize_access_token(access_token)
+@app.route('/get_my_data/<user_data>', methods=['GET'])
+def get_my_data(user_data):
+    user_data = osm_auth.deserialize_data(user_data)
     user_name = user_data['username']
     session['user_name'] = user_name
     return redirect(url_for('display_sequence'))
