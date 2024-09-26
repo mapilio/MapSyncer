@@ -60,7 +60,10 @@ class OSCPhoto:
         photo.photo_id = json.get('id', None)
         photo.latitude = json.get('lat', None)
         photo.longitude = json.get('lng', None)
-        photo.timestamp = datetime.datetime.strptime(shot_date, '%Y-%m-%d %H:%M:%S').timestamp()
+        try:
+            photo.timestamp = datetime.strptime(shot_date, '%Y-%m-%d %H:%M:%S.%f').timestamp()
+        except ValueError:
+            photo.timestamp = datetime.strptime(shot_date, '%Y-%m-%d %H:%M:%S').timestamp()
         photo.sequence_index = json.get('sequenceIndex', None)
 
         if photo.photo_id is None or \
