@@ -8,8 +8,8 @@ import webbrowser
 import requests
 from flask import Flask, render_template, request, jsonify, redirect, url_for, session
 from mapilio_kit.base import authenticator
-from mapilio_kit.components.edit_config import edit_config
-from mapilio_kit.components.login import list_all_users
+from mapilio_kit.components.utilities.edit_config import edit_config
+from mapilio_kit.components.auth.login import list_all_users
 from osm_login_python.core import Auth
 
 from MapSyncer.components.download import download_user_images, check_sequence_status, progress
