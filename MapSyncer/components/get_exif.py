@@ -121,7 +121,7 @@ def get_exif(seq_id, sequence_path, lth_images):
         api_data_details = response_details.json()
 
         while hasMoreData:
-            # There is no need to use acces token.
+            # No need to use access token.
             # url = f"https://api.openstreetcam.org/2.0/photo/?access_token={access_token}&sequenceId={seq_id}&page={page_count}"
             url = f"https://api.openstreetcam.org/2.0/photo/?&sequenceId={seq_id}&page={page_count}"
             response_photos = requests.get(url)
@@ -186,24 +186,19 @@ def get_exif(seq_id, sequence_path, lth_images):
                     platform = api_data_details.get("osv", {}).get("platform")
 
                     if platform == "iOS" or "iPhone" in platform:
-                        device_make = "Apple"
-                        device_model = device_name.split(",")[0].replace("iPhone", "iPhone ")
+                        device_make, device_model = "Apple", device_name.split(",")[0].replace("iPhone", "iPhone ")
 
                     elif platform == "Android" and " " in device_name:
-                        device_make = device_name.split(" ")[0]
-                        device_model = device_name.split(" ", 1)[1]
+                        device_make, device_model = device_name.split(" ")[0], device_name.split(" ", 1)[1]
 
                     elif platform == "samsung":
-                        device_make = "Samsung"
-                        device_model = device_name
+                        device_make, device_model = "Samsung", device_name
 
                     elif platform == "GoPro":
-                        device_make = "GoPro"
-                        device_model = device_name
+                        device_make, device_model = "GoPro", device_name
 
                     else:
-                        device_make = "Unknown"
-                        device_model = "Unknown"
+                        device_make, device_model = "Unknown", "Unknown"
 
                     photo_data = \
                         {
@@ -231,17 +226,19 @@ def get_exif(seq_id, sequence_path, lth_images):
                             "vfov": vfov,
                             "focalLength": fLen,
                             "filename": api_photo_data["name"],
-                            "accuracy_level": float(api_photo_data["gpsAccuracy"]) if api_photo_data.get(
-                                "gpsAccuracy") is not None else None,
                             "path": ""
                         }
 
+                    if api_photo_data.get("gpsAccuracy") is not None: photo_data["accuracy_level"] = float(api_photo_data["gpsAccuracy"])
                     mapilio_description.append(photo_data)
                     processed_count += 1
                 page_count += 1
                 hasMoreData = api_data_photos['result'].get('hasMoreData', False)
             else:
-                print("No 'data' key found in the JSON response.")
+                if "empty" in api_data_photos['status']['apiMessage']:
+                    print(f"{Fore.YELLOW}{api_data_photos['status']['apiMessage']}, so skipping the {page_count} page.{Fore.RESET}")
+                    hasMoreData = False
+
 
         description_information = {
             "Information": {
