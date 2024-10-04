@@ -10,6 +10,7 @@ from flask import Flask, render_template, request, jsonify, redirect, url_for, s
 from mapilio_kit.base import authenticator
 from mapilio_kit.components.utilities.edit_config import edit_config
 from mapilio_kit.components.auth.login import list_all_users
+from mapilio_kit.base.loader import upload
 from osm_login_python.core import Auth
 
 from MapSyncer.components.download import download_user_images, check_sequence_status, progress
@@ -358,8 +359,9 @@ def upload_sequence():
             if log_entry["upload_success"]:
                 return jsonify({"status": "success", "message": "Sequence already uploaded"}), 200
             else:
-                result = os.system(f"mapilio_kit upload --processed {upload_folder_path}")
-                if result != 0:
+                result = upload(upload_folder_path)
+
+                if not result['Success']:
                     print(f"Error occurred while uploading {sequence_id}")
                     return jsonify({"status": "error",
                                     "message": "An error occurred during the upload process. Please check the terminal for further details."}), 500
