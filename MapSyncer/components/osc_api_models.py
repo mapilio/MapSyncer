@@ -1,7 +1,7 @@
 """This file contains all the osc api models """
 # pylint: disable=R0902
 
-import datetime
+from datetime import datetime
 from decimal import Decimal
 from typing import Optional
 
