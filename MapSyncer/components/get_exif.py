@@ -185,7 +185,7 @@ def get_exif(seq_id, sequence_path, lth_images):
                     device_name = api_data_details.get("osv", {}).get("deviceName", "")
                     platform = api_data_details.get("osv", {}).get("platform")
 
-                    if platform == "iOS" or "iPhone" in platform:
+                    if platform == "iOS" or (platform and "iPhone" in platform):
                         device_make, device_model = "Apple", device_name.split(",")[0].replace("iPhone", "iPhone ")
 
                     elif platform == "Android" and " " in device_name:
